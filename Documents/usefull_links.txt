@@ -1,0 +1,8 @@
+Jira link:
+	https://summer-internship-2024.atlassian.net/jira/software/projects/KAN/boards/1
+
+Github link:
+	https://github.com/laszloasandor93/Summer_Internship_24
+
+Requirements:
+	https://docs.google.com/spreadsheets/d/1491b1-wnKr0oVqyGGiGp6fzTqYDol4LydU4cXRSOz4I/edit?gid=0#gid=0
