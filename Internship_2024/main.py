@@ -28,7 +28,6 @@ color_sensor = ColorSensor(Port.S1)
 
 # Task to read ultrasonic sensor continuously
 async def read_ultrasonic_sensor():
-    global obstacle_detected
     while True:
         
         await asyncio.sleep_ms(15)  # Adjust sleep time as needed
