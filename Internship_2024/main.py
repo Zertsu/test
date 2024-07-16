@@ -26,6 +26,20 @@ gyro_sensor = GyroSensor(Port.S3)
 # Initialize the Color Sensor. It is used to detect the color of the objects.
 color_sensor = ColorSensor(Port.S1)
 
+async def state_machine():
+    global state
+    while True:
+        if state == States.IDLE:
+            if(check_first_entry() == True):
+                onEntry_Idle()
+            else:
+                if(checkTranitionNeeded_Idle() == True):
+                    onExit_Idle()
+                else :
+                    inState_Idle()
+        await asyncio.sleep_ms(50)  # Adjust sleep time as needed
+
+
 # Task to read ultrasonic sensor continuously
 async def read_ultrasonic_sensor():
     while True:
