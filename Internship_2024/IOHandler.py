@@ -18,18 +18,32 @@ color_sensor = ColorSensor(Port.S1)
 
 async def IOHandler():
 
+    #initializing the previos_shoot, shoot_state 
+    previous_shoot = 0
+    shoot_state = 0
+
     while True: 
 
         # reading values from the RTE    
         motor_speed_left = Rte_Read_IOHandler_si16_Motor_speed_left()
         motor_speed_right = Rte_Read_IOHandler_si16_Motor_speed_right()
         shoot = Rte_Read_IOHandler_b_Shoot()
+        
+
+        # telling the bazooka to shoot
+        if shoot == 1 and previous_shoot = 0:
+            bazooka.reset_angle()
+            bazooka.run_angle(1080, 1000, then=Stop.HOLD, wait=False)
+            shoot = 0
+            shoot_state = 1
+
+        # checking if the shoot was completed
+        if shoot_state == 1 and bazooka.angle()<1002 and bazooka.angle()>998:
+            shoot_state = 0
+            Rte_Write_IOHandler_b_Shoot(shoot)
+
 
         # transfering the data from the RTE to the motors
-        if shoot == 1 :
-            bazooka.run_angle(600, 1070, then=Stop.HOLD, wait=True)
-            shoot = 0
-
         left_motor.run(motor_speed_left)
         right_motor.run(motor_speed_right)
 
@@ -39,10 +53,12 @@ async def IOHandler():
         raw_color = color_sensor.color()
 
 
-        # writing rhe values to the RTE
+        # writing the values to the RTE
         Rte_Write_IOHandler_si16_Raw_distance(raw_distance)
         Rte_Write_IOHandler_si16_Raw_angle(raw_angle)
         Rte_Write_IOHandler_e_Raw_color(raw_color)
-        Rte_Write_IOHandler_b_Shoot(shoot)
+        
+
+        previous_shoot = shoot
 
         await asyncio.sleep_ms(50)
