@@ -15,6 +15,23 @@ global b_Emergency_timeout
 global E_State
 global b_Shoot
 
+ui8_Control_bits = 0
+si16_Angle = 0
+si16_Raw_angle = 0
+b_Angle_reset = False
+f_Distance = 0
+si16_Raw_distance = 0
+e_Raw_color = None
+e_Color = None
+ui32_Time = 0
+ui32_Last_packet_time = 0
+si16_Motor_speed_left = 0
+si16_Motor_speed_right = 0
+b_Emergency_distance = False
+b_Emergency_timeout = False
+E_State = None
+b_Shoot = False
+
 
 
 
@@ -197,4 +214,3 @@ def Rte_Write_IOHandler_b_Shoot(arg):
 def Rte_Write_Stopwatch_ui32_Time(arg):
     global ui32_Time
     ui32_Time = arg
-
