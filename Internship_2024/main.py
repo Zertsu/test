@@ -9,7 +9,7 @@ import StateMachineSWC
 import MotorSWC
 import GyroSWC
 import UltrasonicSWC
-import ColorsensorSWC
+# import ColorsensorSWC  # Temporarily disabled, see ColorsensorSWC.py
 import EmergencySWC
 import BazookaSWC
 
@@ -22,18 +22,18 @@ def main():
     loop = asyncio.get_event_loop()
     
     # Handler tasks
-    loop.create_task(IOHandler.IOHandler)
-    loop.create_task(ComunicationHandler.ComunicationHandler_Recieve)
-    loop.create_task(ComunicationHandler.ComunicationHandler_Send)
+    loop.create_task(IOHandler.IOHandler())
+    loop.create_task(ComunicationHandler.ComunicationHandler_Recieve())
+    loop.create_task(ComunicationHandler.ComunicationHandler_Send())
 
     # SWCs
-    loop.create_task(StateMachineSWC.state_machine)
-    loop.create_task(MotorSWC.MotorSWC)
-    loop.create_task(GyroSWC.GyroSWC)
-    loop.create_task(UltrasonicSWC.UltrasonicSWC)
-    loop.create_task(ColorsensorSWC.ColorsensorSWC)
-    loop.create_task(EmergencySWC.EmergencySWC)
-    loop.create_task(BazookaSWC.BazookaSWC)
+    loop.create_task(StateMachineSWC.state_machine())
+    loop.create_task(MotorSWC.MotorSWC())
+    loop.create_task(GyroSWC.GyroSWC())
+    loop.create_task(UltrasonicSWC.UltrasonicSWC())
+    # loop.create_task(ColorsensorSWC.ColorsensorSWC) # Temporarily disabled, see ColorsensorSWC.py
+    loop.create_task(EmergencySWC.EmergencySWC())
+    loop.create_task(BazookaSWC.BazookaSWC())
     
     
     loop.run_forever()

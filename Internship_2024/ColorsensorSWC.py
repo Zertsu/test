@@ -1,7 +1,10 @@
 from RTE import Rte_Read_ColorsensorSWC_e_Raw_color, Rte_Write_ColorsensorSWC_e_Color
+import uasyncio as asyncio
+
 #for unit test:
 from RTE import Rte_Write_IOHandler_e_Raw_color
 
+# TODO Counter does not exist in micropython, temporarily disabled SWC 
 from collections import Counter
 from enum import Enum
 from pybricks.parameters import Color

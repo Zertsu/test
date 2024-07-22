@@ -1,6 +1,4 @@
-from enum import Enum
-
-class States(Enum):
+class States():
     NONE = 0
     IDLE = 1
     GO_FORWARD = 2

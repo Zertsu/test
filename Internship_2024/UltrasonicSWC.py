@@ -1,4 +1,5 @@
 from RTE import Rte_Read_UltrasonicSWC_si16_Raw_distance, Rte_Write_UltrasonicSWC_f_Distance
+import uasyncio as asyncio
 
 
 # Task to read ultrasonic sensor continuously

@@ -1,6 +1,7 @@
 from RTE import Rte_Read_ComunicationHandler_ui32_Time, Rte_Read_ComunicationHandler_f_Distance, Rte_Write_ComunicationHandler_ui8_Control_bits, Rte_Write_ComunicationHandler_ui32_Last_packet_time
+import uasyncio as asyncio
 
-import asyncio
+
 import socket
 import struct
 
@@ -29,6 +30,7 @@ async def ComunicationHandler_Recieve():
 
     while True:
         packet, recvAddress = udpSocket.recvfrom(64)
+        print(packet, recvAddress)
         if packet:
             runsSinceLastPacket = 0
             lastPacketSender = recvAddress

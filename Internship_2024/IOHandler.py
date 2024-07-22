@@ -1,8 +1,12 @@
+import RTE
+
 from RTE import Rte_Read_IOHandler_si16_Motor_speed_left, Rte_Read_IOHandler_si16_Motor_speed_right, Rte_Read_IOHandler_b_Shoot, Rte_Write_IOHandler_si16_Raw_distance, Rte_Write_IOHandler_si16_Raw_angle, Rte_Write_IOHandler_e_Raw_color, Rte_Write_IOHandler_b_Shoot
+import uasyncio as asyncio
 
 from pybricks.hubs import EV3Brick
 from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
                                  InfraredSensor, UltrasonicSensor, GyroSensor)
+from pybricks.parameters import Stop, Port
 
 # Create your objects here.
 ev3 = EV3Brick()
@@ -31,7 +35,7 @@ async def IOHandler():
         
 
         # telling the bazooka to shoot
-        if shoot == 1 and previous_shoot = 0:
+        if shoot == 1 and previous_shoot == 0:
             bazooka.reset_angle()
             bazooka.run_angle(1080, 1000, then=Stop.HOLD, wait=False)
             shoot = 0

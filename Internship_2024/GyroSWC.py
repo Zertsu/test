@@ -1,4 +1,5 @@
 from RTE import Rte_Read_GyroSWC_si16_Raw_angle, Rte_Read_GyroSWC_b_Angle_reset, Rte_Write_GyroSWC_si16_Angle, Rte_Write_GyroSWC_b_Angle_reset
+import uasyncio as asyncio
 
 # Task to read gyroscopic sensor continuously
 async def GyroSWC():
