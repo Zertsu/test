@@ -38,10 +38,13 @@ def checkTranitionNeeded_Idle():
         return True
     if controlBits & 1 << 2:
         nextState = States.TURN_LEFT
+        return True
     if controlBits & 1 << 3:
         nextState = States.TURN_RIGHT
+        return True
     if controlBits & 1 << 4:
         nextState = States.SHOOT
+        return True
 
  
 previousShootBit = True
@@ -60,7 +63,14 @@ def checkTranitionNeeded_Shoot():
 def checkTranitionNeeded_Mooving(mask):
     global nextState
     controlBits = Rte_Read_StateMachineSWC_ui8_Control_bits()
-    print(controlBits, mask)
+    emergency_distance = Rte_Read_StateMachineSWC_b_Emergency_distance()
+    emergency_timeout = Rte_Read_StateMachineSWC_b_Emergency_timeout()
+    if emergency_timeout:
+        nextState = States.IDLE
+        return True
+    if emergency_distance and not (controlBits & 1 << 1):
+        nextState = States.IDLE
+        return True
     if not (controlBits & mask):
         nextState = States.IDLE
         return True
