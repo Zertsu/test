@@ -386,7 +386,7 @@
             </div>
             <div id="content">
                 <div id="sidebar">
-                    <input type="checkbox" id="nav-toggle-cb" checked="checked">
+                    <input type="checkbox" id="nav-toggle-cb">
                     <nav id="menu">
 
                         <section id="xclk-section" class="nothidden">
@@ -707,6 +707,15 @@
                         <img id="stream" src="" crossorigin>
                     </div>
                 </figure>
+                <div id="my_controls">
+                  <input type="button" value="Forward" id="my_forward">
+                  <input type="button" value="Backward" id="my_backward">
+                  <input type="button" value="Left" id="my_left">
+                  <input type="button" value="Right" id="my_right">
+                  <input type="button" value="Shoot" id="my_shoot">
+                  <input type="button" value="Guarding mode" id="my_guarding">
+                  Distance: <span id="my_distance"></span>
+                </div>
             </div>
         </section>
         <script>
@@ -1145,8 +1154,49 @@ document.addEventListener('DOMContentLoaded', function (event) {
       disable(enrollButton)
     }
   }
-})
 
+
+  const buttons = {status: 0, timeoutId: -1}
+  for (const [index, element] of ["my_forward", "my_backward", "my_left", "my_right", "my_shoot", null, "my_guarding"].entries()) {
+    if(!element) {
+      continue
+    }
+    const domElement = document.getElementById(element)
+    domElement.addEventListener("mousedown", e => {
+      buttons.status |= 1 << index
+      sendButtons()
+    })
+    domElement.addEventListener("mouseup", e => {
+      buttons.status &= ~(1 << index)
+      sendButtons()
+    })
+  }
+
+  function sendButtons() {
+    clearTimeout(buttons.timeoutId)
+    fetch("/buttons?buttons=" + buttons.status).then(function (response) {
+    }).then(function (data) {
+    }).catch(function (err) {
+      console.log('Fetch Error :-S', err);
+    });
+    buttons.timeoutId = setTimeout(sendButtons, 800);
+  }
+
+  const distanceEl = document.getElementById("my_distance")
+  
+  function updateDistance() {
+    fetch("/distance").then(function (response) {
+      return response.arrayBuffer();
+    }).then(function (data) {
+      distanceEl.innerText = new DataView(data).getFloat32(0, false)
+    }).catch(function (err) {
+      console.log('Fetch Error :-S', err);
+    });
+  }
+  setInterval(() => {
+    updateDistance()
+  }, 2000);
+})
         </script>
     </body>
 </html>

@@ -24,6 +24,8 @@
 
 #include "who_camera.h"
 
+
+
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
 #define TAG ""
@@ -35,6 +37,13 @@ static const char *TAG = "camera_httpd";
 static QueueHandle_t xQueueFrameI = NULL;
 static QueueHandle_t xQueueFrameO = NULL;
 static bool gReturnFB = true;
+
+
+static QueueHandle_t x_my_buttonsQ = NULL;
+static QueueHandle_t x_my_distanceQ = NULL;
+static char currentDistance[4];
+
+SemaphoreHandle_t my_xMutex;
 
 static int8_t detection_enabled = 0;
 static int8_t recognition_enabled = 0;
@@ -669,14 +678,64 @@ static esp_err_t monitor_handler(httpd_req_t *req)
     return httpd_resp_send(req, (const char *)monitor_html_gz_start, monitor_html_gz_len);
 }
 
-void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb)
+
+static esp_err_t my_buttons_handler(httpd_req_t *req)
+{
+    char *buf = NULL;
+    char _button[32];
+
+    if (parse_get(req, &buf) != ESP_OK ||
+        httpd_query_key_value(buf, "buttons", _button, sizeof(_button)) != ESP_OK)
+    {
+        free(buf);
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
+    free(buf);
+
+    int button = atoi(_button);
+
+    if(x_my_buttonsQ) {
+        xQueueSend(x_my_buttonsQ, &button, portMAX_DELAY);
+    }
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    return httpd_resp_send(req, "K", 1);
+}
+
+
+static esp_err_t my_distance_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "application/octet-stream");
+    return httpd_resp_send(req, currentDistance, 4);
+}
+
+static void task_distanceHandler(void *arg)
+{
+    char buff[4];
+    while (true)
+    {
+        xQueueReceive(x_my_distanceQ, &(buff), portMAX_DELAY);
+        xSemaphoreTake(my_xMutex, portMAX_DELAY);
+        memcpy(currentDistance, buff, 4);
+        xSemaphoreGive(my_xMutex);
+    }
+}
+
+
+void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb, const QueueHandle_t my_buttonsQ, const QueueHandle_t my_distanceQ)
 {
     xQueueFrameI = frame_i;
     xQueueFrameO = frame_o;
     gReturnFB = return_fb;
 
+    x_my_buttonsQ = my_buttonsQ;
+    x_my_distanceQ = my_distanceQ;
+
+    my_xMutex = xSemaphoreCreateMutex();
+
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 12;
+    config.max_uri_handlers = 14;
 
     httpd_uri_t index_uri = {
         .uri = "/",
@@ -750,6 +809,18 @@ void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, co
         .handler = monitor_handler,
         .user_ctx = NULL};
 
+    httpd_uri_t my_buttons_uri = {
+        .uri = "/buttons",
+        .method = HTTP_GET,
+        .handler = my_buttons_handler,
+        .user_ctx = NULL};
+
+    httpd_uri_t my_distance_uri = {
+        .uri = "/distance",
+        .method = HTTP_GET,
+        .handler = my_distance_handler,
+        .user_ctx = NULL};
+
     ESP_LOGI(TAG, "Starting web server on port: '%d'", config.server_port);
     if (httpd_start(&camera_httpd, &config) == ESP_OK)
     {
@@ -766,6 +837,9 @@ void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, co
 
         httpd_register_uri_handler(camera_httpd, &mdns_uri);
         httpd_register_uri_handler(camera_httpd, &monitor_uri);
+
+        httpd_register_uri_handler(camera_httpd, &my_buttons_uri);
+        httpd_register_uri_handler(camera_httpd, &my_distance_uri);
     }
 
     config.server_port += 1;
@@ -774,5 +848,9 @@ void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, co
     if (httpd_start(&stream_httpd, &config) == ESP_OK)
     {
         httpd_register_uri_handler(stream_httpd, &stream_uri);
+    }
+
+    if(x_my_distanceQ) {
+        xTaskCreate(task_distanceHandler, TAG, 4 * 1024, NULL, 5, NULL);
     }
 }
