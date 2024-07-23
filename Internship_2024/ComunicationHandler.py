@@ -34,6 +34,7 @@ async def ComunicationHandler_Recieve():
     while True:
         try:
             packet, recvAddress = udpSocket.recvfrom(64)
+            # print(packet)
             if packet:
                 runsSinceLastPacket = 0
                 lastPacketSender = recvAddress
@@ -54,7 +55,7 @@ def handlePacket(packet):
 
     if packetType == 0:
         # Ping packet
-        return b'\1' + packetData[0]
+        return b'\1' + bytes(packetData[0])
     if packetType == 1:
         # Pong packet
         # do nothing

@@ -10,6 +10,25 @@ async def MotorSWC():
     timesChanged = 0  # counter for the above situation
     while True: 
         state = Rte_Read_MotorSWC_E_State()
+        if state == States.GO_FORWARD:
+            Rte_Write_MotorSWC_si16_Motor_speed_left(100)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(100)
+        elif state == States.GO_BACKWARD:
+            Rte_Write_MotorSWC_si16_Motor_speed_left(-100)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(-100)
+        elif state == States.TURN_LEFT:
+            Rte_Write_MotorSWC_si16_Motor_speed_left(-100)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(100)
+        elif state == States.TURN_RIGHT:
+            Rte_Write_MotorSWC_si16_Motor_speed_left(100)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(-100)
+        else:
+            Rte_Write_MotorSWC_si16_Motor_speed_left(0)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(0)
+        await asyncio.sleep_ms(50)  # Adjust sleep time later if needed
+        # TODO make better
+        continue
+
         # angle = Rte_Read_MotorSWC_si16_Angle()   # we might not use this later
         # time - probably won't use it later
         # speeds are in deg/s
