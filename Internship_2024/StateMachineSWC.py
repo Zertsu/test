@@ -57,6 +57,15 @@ def checkTranitionNeeded_Shoot():
         return True
     return False
 
+def checkTranitionNeeded_Mooving(mask):
+    global nextState
+    controlBits = Rte_Read_StateMachineSWC_ui8_Control_bits()
+    print(controlBits, mask)
+    if not (controlBits & mask):
+        nextState = States.IDLE
+        return True
+    return False
+
 async def state_machine():
     global state
     global lastState
@@ -73,15 +82,17 @@ async def state_machine():
                     pass # Do nothing
         
         elif state == States.GO_FORWARD:
-            pass # Do nothing
+            checkTranitionNeeded_Mooving(1 << 0)
         elif state == States.GO_BACKWARD:
-            pass # Do nothing
+            checkTranitionNeeded_Mooving(1 << 1)
         elif state == States.TURN_LEFT:
             if(check_first_entry() == True):
                 Rte_Write_StateMachineSWC_b_Angle_reset(False)
+            checkTranitionNeeded_Mooving(1 << 2)
         elif state == States.TURN_RIGHT:
             if(check_first_entry() == True):
                 Rte_Write_StateMachineSWC_b_Angle_reset(False)
+            checkTranitionNeeded_Mooving(1 << 3)
         elif state == States.SHOOT:
             if(check_first_entry() == True):
                 pass # Do nothing

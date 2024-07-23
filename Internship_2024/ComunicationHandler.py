@@ -9,7 +9,7 @@ import socket
 import struct
 
 # Configuration
-bindAddress = ("0.0.0.0", 16002)
+bindAddress = ("0.0.0.0", 15002)
 recieveRunPeriod = 20
 sendRunPeriod = 50
 
@@ -32,27 +32,29 @@ async def ComunicationHandler_Recieve():
     runsSinceLastPacket = 0
 
     while True:
-        packet, recvAddress = udpSocket.recvfrom(64)
-        print(packet, recvAddress)
-        if packet:
-            runsSinceLastPacket = 0
-            lastPacketSender = recvAddress
-            response = handlePacket(packet)
-            if not response == None:
-                udpSocket.sendto(response, recvAddress)
-        else:
-            runsSinceLastPacket += 1
-        Rte_Write_ComunicationHandler_ui32_Last_packet_time(runsSinceLastPacket * runPeriod)
+        try:
+            packet, recvAddress = udpSocket.recvfrom(64)
+            if packet:
+                runsSinceLastPacket = 0
+                lastPacketSender = recvAddress
+                response = handlePacket(packet)
+                if not response == None:
+                    udpSocket.sendto(response, recvAddress)
+            else:
+                runsSinceLastPacket += 1
+            Rte_Write_ComunicationHandler_ui32_Last_packet_time(runsSinceLastPacket * recieveRunPeriod)
+        except OSError as e:
+            pass
         await asyncio.sleep_ms(recieveRunPeriod)
 
 
 def handlePacket(packet):
     packetType = packet[0]
-    packetData = packet[0:]
+    packetData = packet[1:]
 
     if packetType == 0:
         # Ping packet
-        return packetData
+        return b'\1' + packetData[0]
     if packetType == 1:
         # Pong packet
         # do nothing
@@ -71,3 +73,5 @@ async def ComunicationHandler_Send():
             distance = Rte_Read_ComunicationHandler_f_Distance()
             packetData = struct.pack("!Bf", 3, distance)
             udpSocket.sendto(packetData, lastPacketSender)
+        await asyncio.sleep_ms(sendRunPeriod)
+        

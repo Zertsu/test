@@ -37,7 +37,7 @@ async def IOHandler():
 
         # telling the bazooka to shoot
         if shoot == 1 and previous_shoot == 0:
-            bazooka.reset_angle()
+            bazooka.reset_angle(0)
             bazooka.run_angle(1080, 1000, then=Stop.HOLD, wait=False)
             shoot = 0
             shoot_state = 1
