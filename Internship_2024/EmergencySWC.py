@@ -18,11 +18,11 @@ async def EmergencySWC():
             emergency_bit = 1
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
         
-        if lastPacketTime > 300:      
-            emergency_bit = 1         #ms   # if last packet time is more than half a second, enter timeout emergency mode
+        if lastPacketTime > 1000:      
+            emergency_bit = 1         #ms   # if last packet time is more than a second, enter timeout emergency mode
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
 
-        if emergency_bit == 1 and distance > 10 and lastPacketTime < 300:
+        if emergency_bit == 1 and distance > 10 and lastPacketTime < 1000:
             emergency_bit = 0       
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)

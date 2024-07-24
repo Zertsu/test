@@ -67,4 +67,4 @@ async def IOHandler():
 
         previous_shoot = shoot
 
-        await asyncio.sleep_ms(50)
+        await asyncio.sleep_ms(20)
