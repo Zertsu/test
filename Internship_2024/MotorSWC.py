@@ -5,92 +5,51 @@ from RTE import Rte_Read_MotorSWC_E_State, Rte_Read_MotorSWC_si16_Angle, Rte_Rea
 import uasyncio as asyncio
 from typedefs import States
 
+# Configuration
+runPeriod = 50
+timeGuards = {
+    "forward-backward": 500,
+    "left-right": 100
+}
+motorSpeed = 100
+
 async def MotorSWC():
-    previousState = States.NONE
-    timesChanged = 0  # counter for the above situation
+    global runPeriod
+    global timeGuards
+    global motorSpeed
+
+    forwardGuard = 0
+    backwardGuard = 0
+    leftGuard = 0
+    rightGuard = 0
     while True: 
         state = Rte_Read_MotorSWC_E_State()
-        if state == States.GO_FORWARD and previousState != States.GO_BACKWARD:
-            Rte_Write_MotorSWC_si16_Motor_speed_left(100)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(100)
-        elif state == States.GO_BACKWARD and previousState != States.GO_FORWARD:
-            Rte_Write_MotorSWC_si16_Motor_speed_left(-100)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(-100)
-        elif state == States.TURN_LEFT and previousState != States.TURN_RIGHT:
-            Rte_Write_MotorSWC_si16_Motor_speed_left(-100)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(100)
-        elif state == States.TURN_RIGHT and previousState != States.TURN_LEFT:
-            Rte_Write_MotorSWC_si16_Motor_speed_left(100)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(-100)
 
-        elif state == States.GO_FORWARD and previousState == States.GO_BACKWARD:
-
-            L_motor_speed = 0   # changing from backward to forward, so it needs to reset to 0
-            R_motor_speed = 0
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-            
-            # have to wait for 0.5 seconds before proceeding!!
-            timesChanged += 1
-            if timesChanged == 10:
-                previousState = state
-                L_motor_speed = 100   # random speed I made up to be default speed
-                R_motor_speed = 100
-                Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-                Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-                timesChanged = 0          
-
-        elif state == States.GO_BACKWARD and previousState == States.GO_FORWARD:
-            L_motor_speed = 0   # changing from backward to forward, so it needs to reset to 0
-            R_motor_speed = 0
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-            
-            # have to wait for 0.5 seconds before proceeding!!
-
-            timesChanged += 1
-            if timesChanged == 10:
-                previousState = state
-                L_motor_speed = -100   # random speed I made up to be default speed
-                R_motor_speed = -100
-                Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-                Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-                timesChanged = 0
-        
-        # left and right
-
-        elif state == States.TURN_LEFT and previousState == States.TURN_RIGHT:
-            L_motor_speed = 100   # random speed I made up to be default speed
-            R_motor_speed = 100
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-            L_motor_speed = 100   
-            R_motor_speed = -100
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-
-        elif state == States.TURN_RIGHT and previousState == States.TURN_LEFT:
-            L_motor_speed = 100   # random speed I made up to be default speed
-            R_motor_speed = 100
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-            L_motor_speed = -100
-            R_motor_speed = 100
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
+        # Write the motor speeds considering the guards
+        if state == States.GO_FORWARD and forwardGuard <= 0:
+            backwardGuard = timeGuards["forward-backward"]
+            Rte_Write_MotorSWC_si16_Motor_speed_left(motorSpeed)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(motorSpeed)
+        elif state == States.GO_BACKWARD and backwardGuard <= 0:
+            forwardGuard = timeGuards["forward-backward"]
+            Rte_Write_MotorSWC_si16_Motor_speed_left(-motorSpeed)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(-motorSpeed)
+        elif state == States.TURN_LEFT and leftGuard <= 0:
+            rightGuard = timeGuards["left-right"]
+            Rte_Write_MotorSWC_si16_Motor_speed_left(-motorSpeed)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(motorSpeed)
+        elif state == States.TURN_RIGHT and rightGuard <= 0:
+            leftGuard = timeGuards["left-right"]
+            Rte_Write_MotorSWC_si16_Motor_speed_left(motorSpeed)
+            Rte_Write_MotorSWC_si16_Motor_speed_right(-motorSpeed)
         else:
             Rte_Write_MotorSWC_si16_Motor_speed_left(0)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(0)    
+            Rte_Write_MotorSWC_si16_Motor_speed_right(0)
 
+        # Process guards
+        leftGuard = max(leftGuard - runPeriod, 0)
+        rightGuard = max(rightGuard - runPeriod, 0)
+        forwardGuard = max(forwardGuard - runPeriod, 0)
+        backwardGuard = max(backwardGuard - runPeriod, 0)
 
-        if state == States.SHOOT or state == States.IDLE or state == States.NONE:
-            L_motor_speed = 0   # in these cases do nothing, come to a full stop
-            R_motor_speed = 0
-            
-            Rte_Write_MotorSWC_si16_Motor_speed_left(L_motor_speed)
-            Rte_Write_MotorSWC_si16_Motor_speed_right(R_motor_speed)
-
-
-        previousState = state
-
-        await asyncio.sleep_ms(50)  # Adjust sleep time later if needed
+        await asyncio.sleep_ms(runPeriod)

@@ -41,11 +41,9 @@ async def ComunicationHandler_Recieve():
                 response = handlePacket(packet)
                 if not response == None:
                     udpSocket.sendto(response, recvAddress)
-            else:
-                runsSinceLastPacket += 1
-            Rte_Write_ComunicationHandler_ui32_Last_packet_time(runsSinceLastPacket * recieveRunPeriod)
         except OSError as e:
-            pass
+            runsSinceLastPacket += 1
+            Rte_Write_ComunicationHandler_ui32_Last_packet_time(runsSinceLastPacket * recieveRunPeriod)
         await asyncio.sleep_ms(recieveRunPeriod)
 
 
