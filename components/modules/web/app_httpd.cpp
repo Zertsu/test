@@ -706,6 +706,7 @@ static esp_err_t my_buttons_handler(httpd_req_t *req)
 
 static esp_err_t my_distance_handler(httpd_req_t *req)
 {
+    // Send out the current distance
     httpd_resp_set_type(req, "application/octet-stream");
     return httpd_resp_send(req, currentDistance, 4);
 }
@@ -715,6 +716,7 @@ static void task_distanceHandler(void *arg)
     char buff[4];
     while (true)
     {
+        // Receive distance values and store them in a global variable
         xQueueReceive(x_my_distanceQ, &(buff), portMAX_DELAY);
         xSemaphoreTake(my_xMutex, portMAX_DELAY);
         memcpy(currentDistance, buff, 4);

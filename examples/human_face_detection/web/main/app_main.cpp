@@ -38,20 +38,23 @@ static bool readyToSend = false;
 #define PORT 15002
 #define TAG "main"
 
-static void task_udp(void *arg);
-static void task_controlsSend(void *arg);
+static void task_udpReciver(void *arg);
+static void task_udpSender(void *arg);
 
 
 extern "C" void app_main()
 {
     app_wifi_main();
 
+    // Create queues for the camera image
     xQueueAIFrame = xQueueCreate(2, sizeof(camera_fb_t *));
     xQueueHttpFrame = xQueueCreate(2, sizeof(camera_fb_t *));
     
+    // Create queues for the face detection
     xQueueEvent = xQueueCreate(1, sizeof(recognizer_state_t *));
     xQueueDetResult = xQueueCreate(1, sizeof(face_info_t *));
 
+    // Create queues for comunication between the website and robot
     xQueueDistance = xQueueCreate(1, sizeof(float *));
     xQueueButtons = xQueueCreate(1, sizeof(int *));
 
@@ -61,8 +64,8 @@ extern "C" void app_main()
     register_human_face_recognition(xQueueAIFrame, NULL, NULL, xQueueHttpFrame);
     register_httpd(xQueueHttpFrame, NULL, true, xQueueButtons, xQueueDistance);
 
-    xTaskCreate(task_udp, TAG, 4 * 1024, NULL, 5, NULL);
-    xTaskCreate(task_controlsSend, TAG, 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(task_udpReciver, TAG, 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(task_udpSender, TAG, 4 * 1024, NULL, 5, NULL);
 }
 
 
@@ -70,15 +73,17 @@ static int processPacket(char *packet, int packetLen, char* response, int respon
 {
     switch (packet[0]) {
         case 0:
+            // Ping packet, send a response
             response[0] = 1;
             response[1] = packet[1];
             return 2;
         case 1:
+            // Pong packet, discovered the robot
             ESP_LOGI(TAG, "Recieved pong packet");
             readyToSend = true;
             return 0;
         case 3:
-            // ESP_LOGI(TAG, "Recieved distance %x %x %x %x", packet[1], packet[2], packet[3], packet[4]);
+            // Distance packet, foward it to the web server
             xQueueSend(xQueueDistance, &(packet[1]), sizeof(float));
             return 0;
         default:
@@ -88,25 +93,26 @@ static int processPacket(char *packet, int packetLen, char* response, int respon
 
 
 // https://github.com/espressif/esp-idf/blob/master/examples/protocols/sockets/udp_server/main/udp_server.c
-static void task_udp(void *arg)
+static void task_udpReciver(void *arg)
 {
     char rx_buffer[128];
     char tx_buffer[128];
-    int addr_family = AF_INET;
     
+    // Listening address
     struct sockaddr_in dest_addr;
     dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(PORT);
 
-
+    // Broadcast address
     struct sockaddr_in braodcastAddr;
     braodcastAddr.sin_family = AF_INET;
     braodcastAddr.sin_port = htons(PORT);
     braodcastAddr.sin_addr.s_addr = htonl(IPADDR_BROADCAST);
     braodcastAddr.sin_len = sizeof(braodcastAddr);
 
-    sock = socket(addr_family, SOCK_DGRAM, 0);
+    // Create socket
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
             ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
             vTaskDelete(NULL);
@@ -114,11 +120,13 @@ static void task_udp(void *arg)
     }
     ESP_LOGI(TAG, "Socket created");
 
+    // Set timeout
     struct timeval timeout;
     timeout.tv_sec = 10;
     timeout.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout);
     
+    // Enable broadcasting
     int bc = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &bc, sizeof(bc)) < 0) {
         ESP_LOGE(TAG, "Failed to set sock options: errno %d", errno);
@@ -126,6 +134,7 @@ static void task_udp(void *arg)
         return;
     }
 
+    // Bind socket
     int err = bind(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err < 0) {
         ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
@@ -139,9 +148,11 @@ static void task_udp(void *arg)
     
     ESP_LOGI(TAG, "Started recieveing");
     while (1) {
+        // Listen for packets
         int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, &source_addr, &socklen);
         if (len < 0) {
             if (errno == EWOULDBLOCK) {
+                // Connection timed out, send a braodcast ping packet
                 ESP_LOGE(TAG, "recvfrom timeout, sending broadcast packet");
                 int err = sendto(sock, "\0\0", 2, 0, (struct sockaddr *)&braodcastAddr, sizeof(braodcastAddr));
                 if (err < 0) {
@@ -169,16 +180,17 @@ static void task_udp(void *arg)
     }
 }
 
-static void task_controlsSend(void *arg)
+static void task_udpSender(void *arg)
 {
     int buttons;
     char buff[8];
     buff[0] = 2;
     while (1) {
+        // Receive buttons from the http server
         xQueueReceive(xQueueButtons, &buttons, portMAX_DELAY);
         if(readyToSend) {
+            // And send them to the robot if the connection is ready
             buff[1] = buttons;
-            // ESP_LOGI(TAG, "Sending buttons %i", buttons);
             sendto(sock, buff, 2, 0, &robotAddr, sizeof(robotAddr));
         }
     }
