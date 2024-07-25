@@ -15,27 +15,40 @@ from pybricks.parameters import Stop, Port
 # Create your objects here.
 ev3 = EV3Brick()
 
-# Initialize motors, ultrasonic sensor, and gyro sensor
-left_motor = Motor(Port.B)
-right_motor = Motor(Port.C)
-bazooka = Motor(Port.A)
-ultrasonic_sensor = UltrasonicSensor(Port.S4)
-gyro_sensor = GyroSensor(Port.S3)
-# Initialize the Color Sensor. It is used to detect the color of the objects.
-color_sensor = ColorSensor(Port.S1)
+# configuration:
+
+LEFT_MOTOR_PORT = Port.B
+RIGHT_MOTOR_PORT = Port.C
+BAZOOKA_MOTOR_PORT = Port.A
+ULTRASONIC_SENSOR_PORT = Port.S4
+GYRO_SENSOR_PORT = Port.S3
+COLOR_SENSOR_PORT = Port.S1
+
+global async_timer
+async_timer = 20 # this variable stores the time in ms that we use in asyncio.sleep
 
 async def IOHandler():
+    # Initialize motors, ultrasonic sensor, color sensor, and gyro sensor
+
+    left_motor = Motor(LEFT_MOTOR_PORT)
+    right_motor = Motor(RIGHT_MOTOR_PORT)
+    bazooka = Motor(BAZOOKA_MOTOR_PORT)
+    ultrasonic_sensor = UltrasonicSensor(ULTRASONIC_SENSOR_PORT)
+    gyro_sensor = GyroSensor(GYRO_SENSOR_PORT)
+    color_sensor = ColorSensor(COLOR_SENSOR_PORT)
 
     #initializing the previos_shoot, shoot_state 
-    previous_shoot = 0
-    shoot_state = 0
+    previous_shoot = 0  # stores the previos shoots value 
+    shoot_state = 0  # stores the shoots state
 
+
+    global async_timer
     while True: 
 
         # reading values from the RTE    
-        motor_speed_left = Rte_Read_IOHandler_si16_Motor_speed_left()
-        motor_speed_right = Rte_Read_IOHandler_si16_Motor_speed_right()
-        shoot = Rte_Read_IOHandler_b_Shoot()
+        motor_speed_left = Rte_Read_IOHandler_si16_Motor_speed_left()  # gets the left motors value from RTE
+        motor_speed_right = Rte_Read_IOHandler_si16_Motor_speed_right()  # gets the right motors value from RTE
+        shoot = Rte_Read_IOHandler_b_Shoot()  #  gets the shoot bit from RTE
         
 
         # telling the bazooka to shoot
@@ -70,4 +83,4 @@ async def IOHandler():
 
         previous_shoot = shoot
 
-        await asyncio.sleep_ms(20)
+        await asyncio.sleep_ms(async_timer)
