@@ -17,8 +17,7 @@ async def UltrasonicSWC():
         distance = Rte_Read_UltrasonicSWC_si16_Raw_distance()   #It will read in mm 
         devide_forcm = 10  #the value we have to devide to get the distance in cm
         # Transfer to cm based on requirement:
-        distance_cm = distance /= devide_forcm # the distance converted to cm
+        distance_cm = distance / devide_forcm # the distance converted to cm
         Rte_Write_UltrasonicSWC_f_Distance(distance_cm)
-
-
+        
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time as needed

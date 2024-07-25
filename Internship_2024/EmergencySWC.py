@@ -9,7 +9,7 @@ global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
 global emergency_bit
-emergency_bit = 0  # this variable stores the value of the emergency bit
+emergency_bit = False  # this variable stores the value of the emergency bit
 
 async def EmergencySWC():
     global async_timer
@@ -21,15 +21,15 @@ async def EmergencySWC():
         global emergency_bit
         
         if distance < distance_emergency:  
-            emergency_bit = 1
+            emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
         
         if lastPacketTime > 1000:      
-            emergency_bit = 1         #ms   # if last packet time is more than a second, enter timeout emergency mode
+            emergency_bit = True        #ms   # if last packet time is more than a second, enter timeout emergency mode
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
 
         if emergency_bit == 1 and distance > distance_emergency and lastPacketTime < 1000:
-            emergency_bit = 0       
+            emergency_bit = False      
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
 

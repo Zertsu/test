@@ -38,8 +38,8 @@ async def IOHandler():
     color_sensor = ColorSensor(COLOR_SENSOR_PORT)
 
     #initializing the previos_shoot, shoot_state 
-    previous_shoot = 0  # stores the previos shoots value 
-    shoot_state = 0  # stores the shoots state
+    previous_shoot = False  # stores the previos shoots value 
+    shoot_state = False  # stores the shoots state
 
 
     global async_timer
@@ -52,16 +52,16 @@ async def IOHandler():
         
 
         # telling the bazooka to shoot
-        if shoot == 1 and previous_shoot == 0:
+        if shoot and previous_shoot == False:
             bazooka.reset_angle(0)
             bazooka.run_angle(1000, 1080, then=Stop.HOLD, wait=False)
-            shoot_state = 1
+            shoot_state = True
 
 
         # checking if the shoot was completed
-        if shoot_state == 1 and bazooka.angle()<1082 and bazooka.angle()>1078:
-            shoot_state = 0
-            shoot = 0
+        if shoot_state and bazooka.angle()<1082 and bazooka.angle()>1078:
+            shoot_state = False
+            shoot = False
             Rte_Write_IOHandler_b_Shoot(shoot)
 
 

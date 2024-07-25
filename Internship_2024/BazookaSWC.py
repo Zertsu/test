@@ -18,7 +18,7 @@ async def BazookaSWC():
     while True: 
         state = Rte_Read_BazookaSWC_E_State() # this variable stores the current state of the robot gets the value from the RTE
         if state == States.SHOOT and previousState != States.SHOOT:
-            Rte_Write_BazookaSWC_b_Shoot(1)
+            Rte_Write_BazookaSWC_b_Shoot(True)
         previousState = state
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
