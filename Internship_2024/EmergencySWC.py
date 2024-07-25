@@ -11,24 +11,32 @@ async_timer = 50 # this variable stores the time in ms that we use in asyncio.sl
 global emergency_bit
 emergency_bit = False  # this variable stores the value of the emergency bit
 
+
+global distance_emergency
+distance_emergency = 10  # this variable stores the distance in cm that is the emergency distance
+
+global timeout
+timeout = 1000  # the timeouts time in ms
+
 async def EmergencySWC():
     global async_timer
-    distance_emergency = 10 # this variable stores the distance in cm that is the emergency distance
     while True: 
         # time = Rte_Read_EmergencySWC_ui32_Time()    # we will probably remove stopwatch, so time as well
         lastPacketTime = Rte_Read_EmergencySWC_ui32_Last_packet_time()  # tells us how many seconds have passed since receiving the last packet
         distance = Rte_Read_EmergencySWC_f_Distance() # gets the distance from the ultrasonic senzor
         global emergency_bit
-        
+        global distance_emergency
+        global timeout
+
         if distance < distance_emergency:  
             emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
         
-        if lastPacketTime > 1000:      
+        if lastPacketTime > timeout:      
             emergency_bit = True        #ms   # if last packet time is more than a second, enter timeout emergency mode
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
 
-        if emergency_bit == 1 and distance > distance_emergency and lastPacketTime < 1000:
+        if emergency_bit and distance > distance_emergency and lastPacketTime < timeout:
             emergency_bit = False      
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)

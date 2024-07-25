@@ -15,10 +15,18 @@ import uasyncio as asyncio
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
+global buffer_size
+buffer_size = 10  # this variable stores the size of the buffer
+
+global oldest_element 
+oldest_element = 0  # the oldast elements location
+
+
 # Task to read color sensor continuously
 async def ColorsensorSWC():
     global async_timer
-    buffer_size = 10  # this variable stores the size of the buffer
+    global buffer_size
+    global oldest_element
     color_buffer = []  # This will store 10 colors each time, analyzing and returning the most common one
     while True:
         while len(color_buffer) < buffer_size:
@@ -30,7 +38,7 @@ async def ColorsensorSWC():
             color_counts = OrderedDict()
             for color in color_buffer:
                 if color in color_counts:
-                    color_counts[color] += 1
+                    color_counts[color] = color_counts[color] + 1
                 else:
                     color_counts[color] = 1
 
@@ -42,7 +50,7 @@ async def ColorsensorSWC():
 
             print(most_common_color)
 
-            color_buffer.pop(0)  # Removing oldest element
+            color_buffer.pop(oldest_element)  # Removing oldest element
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
 
