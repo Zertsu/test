@@ -1,4 +1,5 @@
 global ui8_Control_bits
+global b_Control_bits_valid
 global si16_Angle
 global si16_Raw_angle
 global b_Angle_reset
@@ -6,8 +7,6 @@ global f_Distance
 global si16_Raw_distance
 global e_Raw_color
 global e_Color
-global ui32_Time
-global ui32_Last_packet_time
 global si16_Motor_speed_left
 global si16_Motor_speed_right
 global b_Emergency_distance
@@ -16,6 +15,7 @@ global E_State
 global b_Shoot
 
 ui8_Control_bits = 0
+b_Control_bits_valid = False
 si16_Angle = 0
 si16_Raw_angle = 0
 b_Angle_reset = False
@@ -23,8 +23,6 @@ f_Distance = 0
 si16_Raw_distance = 0
 e_Raw_color = None
 e_Color = None
-ui32_Time = 0
-ui32_Last_packet_time = 0
 si16_Motor_speed_left = 0
 si16_Motor_speed_right = 0
 b_Emergency_distance = False
@@ -70,10 +68,6 @@ def Rte_Read_MotorSWC_E_State():
 def Rte_Read_MotorSWC_si16_Angle():
     global si16_Angle
     return si16_Angle
-
-def Rte_Read_MotorSWC_ui32_Time():
-    global ui32_Time
-    return ui32_Time
 
 def Rte_Write_MotorSWC_si16_Motor_speed_left(arg):
     global si16_Motor_speed_left
@@ -127,13 +121,9 @@ def Rte_Write_ColorsensorSWC_e_Color(arg):
 
 
 # EmergencySWC
-def Rte_Read_EmergencySWC_ui32_Time():
-    global ui32_Time
-    return ui32_Time
-
-def Rte_Read_EmergencySWC_ui32_Last_packet_time():
-    global ui32_Last_packet_time
-    return ui32_Last_packet_time
+def Rte_Read_EmergencySWC_b_Control_bits_valid():
+    global b_Control_bits_valid
+    return b_Control_bits_valid
 
 def Rte_Read_EmergencySWC_f_Distance():
     global f_Distance
@@ -161,10 +151,6 @@ def Rte_Write_BazookaSWC_b_Shoot(arg):
 
 
 # ComunicationHandler
-def Rte_Read_ComunicationHandler_ui32_Time():
-    global ui32_Time
-    return ui32_Time
-
 def Rte_Read_ComunicationHandler_f_Distance():
     global f_Distance
     return f_Distance
@@ -173,9 +159,9 @@ def Rte_Write_ComunicationHandler_ui8_Control_bits(arg):
     global ui8_Control_bits
     ui8_Control_bits = arg
 
-def Rte_Write_ComunicationHandler_ui32_Last_packet_time(arg):
-    global ui32_Last_packet_time
-    ui32_Last_packet_time = arg
+def Rte_Write_ComunicationHandler_b_Control_bits_valid(arg):
+    global b_Control_bits_valid
+    b_Control_bits_valid = arg
 
 
 
@@ -208,9 +194,3 @@ def Rte_Write_IOHandler_b_Shoot(arg):
     global b_Shoot
     b_Shoot = arg
 
-
-
-# Stopwatch
-def Rte_Write_Stopwatch_ui32_Time(arg):
-    global ui32_Time
-    ui32_Time = arg

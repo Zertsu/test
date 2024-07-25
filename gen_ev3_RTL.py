@@ -1,5 +1,6 @@
 vars = {
     "ui8_Control_bits": 0,
+    "b_Control_bits_valid":  False,
 
     "si16_Angle":  0,
     "si16_Raw_angle":  0,
@@ -11,9 +12,6 @@ vars = {
     "e_Raw_color": None,
     "e_Color": None,
 
-    "ui32_Time":   0,
-    "ui32_Last_packet_time":  0,
-    
     "si16_Motor_speed_left":   0,
     "si16_Motor_speed_right":  0,
 
@@ -31,7 +29,7 @@ comps = {
         ["E_State", "b_Angle_reset"]
     ],
     "MotorSWC": [
-        ["E_State", "si16_Angle", "ui32_Time"],
+        ["E_State", "si16_Angle"],
         ["si16_Motor_speed_left", "si16_Motor_speed_right"]
     ],
     "GyroSWC": [
@@ -47,7 +45,7 @@ comps = {
         ["e_Color"]
     ],
     "EmergencySWC": [
-        ["ui32_Time", "ui32_Last_packet_time", "f_Distance"],
+        ["b_Control_bits_valid", "f_Distance"],
         ["b_Emergency_distance", "b_Emergency_timeout"]
     ],
     "BazookaSWC": [
@@ -55,16 +53,12 @@ comps = {
         ["b_Shoot"]
     ],
     "ComunicationHandler": [
-        ["ui32_Time", "f_Distance"],
-        ["ui8_Control_bits", "ui32_Last_packet_time"]
+        ["f_Distance"],
+        ["ui8_Control_bits", "b_Control_bits_valid"]
     ],
     "IOHandler": [
         ["si16_Motor_speed_left", "si16_Motor_speed_right", "b_Shoot"],
         ["si16_Raw_distance", "si16_Raw_angle", "e_Raw_color", "b_Shoot"]
-    ],
-    "Stopwatch": [
-        [],
-        ["ui32_Time"]
     ]
 }
 
