@@ -7,12 +7,16 @@ import uasyncio as asyncio
 
 
 # Configuration
-RUN_PERIOD = 50
-BUFFER_SIZE = 10
+RUN_PERIOD = 50 # [ms] Run period of the component
+BUFFER_SIZE = 10 # Size of the buffer used for filtering
+
+# Constants
+OLDEST_ELEMENT = 0 # Oldest element in list (we add new ones to the end)
 
 # Task to read color sensor continuously
 async def ColorsensorSWC():
     global BUFFER_SIZE
+    global OLDEST_ELEMENT
     
     # Initialize variables
     color_buffer = [None] * BUFFER_SIZE
@@ -31,13 +35,13 @@ async def ColorsensorSWC():
     
     while True:
         # Remove the oldest color from the buffer
-        removedColor = color_buffer.pop(0)
-        color_occurances[removedColor] -= 1
+        removedColor = color_buffer.pop(OLDEST_ELEMENT)
+        color_occurances[removedColor] = color_occurances[removedColor] - 1
 
         # Add incoming color to the buffer
         currentColor = Rte_Read_ColorsensorSWC_e_Raw_color()
         color_buffer.append(currentColor)
-        color_occurances[currentColor] += 1
+        color_occurances[currentColor] = color_occurances[currentColor] + 1
 
         # Get most common color and output it
         mostCommonColor = max(color_occurances, key=color_occurances.get)
