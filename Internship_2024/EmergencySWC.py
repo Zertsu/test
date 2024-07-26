@@ -15,14 +15,11 @@ emergency_bit = False  # this variable stores the value of the emergency bit
 global distance_emergency
 distance_emergency = 10  # this variable stores the distance in cm that is the emergency distance
 
-global timeout
-timeout = 1000  # the timeouts time in ms
 
 async def EmergencySWC():
     global async_timer
     while True: 
         connectionTimedOut = Rte_Read_EmergencySWC_b_Control_bits_valid() # tells us when the connection is timed out
-        lastPacketTime = Rte_Read_EmergencySWC_ui32_Last_packet_time()  
         distance = Rte_Read_EmergencySWC_f_Distance() # gets the distance from the ultrasonic senzor
         global emergency_bit
         global distance_emergency
