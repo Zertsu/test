@@ -34,13 +34,14 @@ static QueueHandle_t xQueueButtons = NULL;
 static struct sockaddr robotAddr;
 static int sock;
 static bool readyToSend = false;
+static bool guardingMode = false;
 
 #define PORT 15002
 #define TAG "main"
 
 static void task_udpReciver(void *arg);
-static void task_udpSender(void *arg);
-
+static void task_udpButtonSender(void *arg);
+static void task_udpRecognitionSender(void *arg);
 
 extern "C" void app_main()
 {
@@ -52,7 +53,7 @@ extern "C" void app_main()
     
     // Create queues for the face detection
     xQueueEvent = xQueueCreate(1, sizeof(recognizer_state_t *));
-    xQueueDetResult = xQueueCreate(1, sizeof(face_info_t *));
+    xQueueDetResult = xQueueCreate(1, sizeof(recognizer_position_t *));
 
     // Create queues for comunication between the website and robot
     xQueueDistance = xQueueCreate(1, sizeof(float *));
@@ -61,11 +62,12 @@ extern "C" void app_main()
 
     register_camera(PIXFORMAT_RGB565, FRAMESIZE_QVGA, 2, xQueueAIFrame);
     app_mdns_main();
-    register_human_face_recognition(xQueueAIFrame, NULL, NULL, xQueueHttpFrame);
+    register_human_face_recognition(xQueueAIFrame, xQueueEvent, xQueueDetResult, xQueueHttpFrame, false, &guardingMode);
     register_httpd(xQueueHttpFrame, NULL, true, xQueueButtons, xQueueDistance);
 
     xTaskCreate(task_udpReciver, TAG, 4 * 1024, NULL, 5, NULL);
-    xTaskCreate(task_udpSender, TAG, 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(task_udpButtonSender, TAG, 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(task_udpRecognitionSender, TAG, 4 * 1024, NULL, 5, NULL);
 }
 
 
@@ -89,6 +91,30 @@ static int processPacket(char *packet, int packetLen, char* response, int respon
         default:
             return 0;
     }
+}
+
+
+static void processCameraButtons(int buttons) {
+    recognizer_state_t requestedState = DETECT;
+    if(buttons & 1 << 6) {
+        guardingMode = !guardingMode;
+        ESP_LOGI(TAG, "Goarding mode is now %s", guardingMode ? "On" : "Off");
+    }
+
+    if(buttons & 1 << 8) {
+        ESP_LOGI(TAG, "Learn Foe");
+        requestedState = ENROLL_FOE;
+    } else if(buttons & 1 << 9) {
+        ESP_LOGI(TAG, "Learn friend");
+        requestedState = ENROLL_FRIEND;
+    } else if(buttons &  1 << 10) {
+        ESP_LOGI(TAG, "Unlearn");
+        requestedState = DELETE;
+    } else if(buttons & 1 << 11) {
+        ESP_LOGI(TAG, "Recognize");
+        requestedState = RECOGNIZE;
+    }
+    xQueueSend(xQueueEvent, &requestedState, sizeof(requestedState));
 }
 
 
@@ -180,7 +206,7 @@ static void task_udpReciver(void *arg)
     }
 }
 
-static void task_udpSender(void *arg)
+static void task_udpButtonSender(void *arg)
 {
     int buttons;
     char buff[8];
@@ -192,6 +218,23 @@ static void task_udpSender(void *arg)
             // And send them to the robot if the connection is ready
             buff[1] = buttons;
             sendto(sock, buff, 2, 0, &robotAddr, sizeof(robotAddr));
+        }
+        processCameraButtons(buttons);
+    }
+}
+
+static void task_udpRecognitionSender(void *arg) {
+    recognizer_position_t facePosition;
+    char buff[8];
+    while (true) {
+        // Recieve face position
+        xQueueReceive(xQueueDetResult, &facePosition, portMAX_DELAY);
+        if(readyToSend) {
+            buff[1] = facePosition.valid;
+            buff[2] = facePosition.x;
+            buff[3] = facePosition.y;
+            buff[0] = 4;
+            sendto(sock, buff, 4, 0, &robotAddr, sizeof(robotAddr));
         }
     }
 }

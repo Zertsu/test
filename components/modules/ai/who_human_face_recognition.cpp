@@ -34,6 +34,8 @@ static recognizer_state_t gEvent = DETECT;
 static bool gReturnFB = true;
 static face_info_t recognize_result;
 
+static const bool *guardingMode;
+
 SemaphoreHandle_t xMutex;
 
 typedef enum
@@ -101,6 +103,10 @@ static void task_process_handler(void *arg)
     recognizer->set_partition(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "fr");
     int partition_result = recognizer->set_ids_from_flash();
 
+    bool lastFrameHadFace = false;
+    bool recoginzedFoe = false;
+    recognizer_position_t result;
+
     while (true)
     {
         xSemaphoreTake(xMutex, portMAX_DELAY);
@@ -111,6 +117,7 @@ static void task_process_handler(void *arg)
         if (_gEvent)
         {
             bool is_detected = false;
+            bool isFoe = false;
 
             if (xQueueReceive(xQueueFrameI, &frame, portMAX_DELAY))
             {
@@ -122,21 +129,30 @@ static void task_process_handler(void *arg)
 
                 if (is_detected)
                 {
+                    if (lastFrameHadFace == false && *guardingMode) {
+                        _gEvent = RECOGNIZE;
+                        lastFrameHadFace = true;
+                    }
                     switch (_gEvent)
                     {
-                    case ENROLL:
-                        recognizer->enroll_id((uint16_t *)frame->buf, {(int)frame->height, (int)frame->width, 3}, detect_results.front().keypoint, "", true);
-                        ESP_LOGW("ENROLL", "ID %d is enrolled", recognizer->get_enrolled_ids().back().id);
+                    case ENROLL_FOE:
+                    case ENROLL_FRIEND:
+                        isFoe = _gEvent == ENROLL_FOE;
+                        recognizer->enroll_id((uint16_t *)frame->buf, {(int)frame->height, (int)frame->width, 3}, detect_results.front().keypoint, isFoe ? "fo" : "fr", true);
+                        ESP_LOGW("ENROLL", "ID %d is enrolled as %s", recognizer->get_enrolled_ids().back().id, isFoe ? "foe" : "friend");
                         frame_show_state = SHOW_STATE_ENROLL;
                         break;
 
                     case RECOGNIZE:
                         recognize_result = recognizer->recognize((uint16_t *)frame->buf, {(int)frame->height, (int)frame->width, 3}, detect_results.front().keypoint);
+                        isFoe = recognize_result.name.compare("fo") == 0;
                         print_detection_result(detect_results);
-                        if (recognize_result.id > 0)
-                            ESP_LOGI("RECOGNIZE", "Similarity: %f, Match ID: %d", recognize_result.similarity, recognize_result.id);
-                        else
-                            ESP_LOGE("RECOGNIZE", "Similarity: %f, Match ID: %d", recognize_result.similarity, recognize_result.id);
+                        if(recognize_result.id > 0) {
+                            ESP_LOGI("RECOGNIZE", "Similarity: %f, Match ID: %d, %s", recognize_result.similarity, recognize_result.id, isFoe ? "foe" : "friend");
+                            recoginzedFoe = isFoe;
+                        } else {
+                            ESP_LOGE("RECOGNIZE", "Similarity: %f, Match ID: %d, %s", recognize_result.similarity, recognize_result.id, isFoe ? "foe" : "friend");
+                        }
                         frame_show_state = SHOW_STATE_RECOGNIZE;
                         break;
 
@@ -150,7 +166,11 @@ static void task_process_handler(void *arg)
                     default:
                         break;
                     }
+                } else {
+                    lastFrameHadFace = false;
+                    recoginzedFoe = false;
                 }
+
 
                 if (frame_show_state != SHOW_STATE_IDLE)
                 {
@@ -163,13 +183,13 @@ static void task_process_handler(void *arg)
 
                     case SHOW_STATE_RECOGNIZE:
                         if (recognize_result.id > 0)
-                            rgb_printf(frame, RGB565_MASK_GREEN, "ID %d", recognize_result.id);
+                            rgb_printf(frame, RGB565_MASK_GREEN, "ID %d, %s", recognize_result.id, isFoe ? "foe" : "friend");
                         else
                             rgb_print(frame, RGB565_MASK_RED, "who ?");
                         break;
 
                     case SHOW_STATE_ENROLL:
-                        rgb_printf(frame, RGB565_MASK_BLUE, "Enroll: ID %d", recognizer->get_enrolled_ids().back().id);
+                        rgb_printf(frame, RGB565_MASK_BLUE, "Enroll %s: ID %d", isFoe ? "foe" : "friend", recognizer->get_enrolled_ids().back().id);
                         break;
 
                     default:
@@ -190,6 +210,19 @@ static void task_process_handler(void *arg)
 #endif
                     draw_detection_result((uint16_t *)frame->buf, frame->height, frame->width, detect_results);
                 }
+
+                if(recoginzedFoe) {
+                    result.valid = 1;
+                    int divisorHorizontal = frame->width / 255;
+                    int divisorVertical = frame->width / 255;
+                    
+                    result.x = detect_results.front().keypoint[4] / divisorHorizontal;
+                    result.y = detect_results.front().keypoint[5] / divisorVertical;
+                } else {
+                    result.valid = 0;
+                    result.x = 0;
+                    result.y = 0;
+                }
             }
 
             if (xQueueFrameO)
@@ -206,9 +239,11 @@ static void task_process_handler(void *arg)
                 free(frame);
             }
 
-            if (xQueueResult && is_detected)
+            if (xQueueResult && *guardingMode)
             {
-                xQueueSend(xQueueResult, &recognize_result, portMAX_DELAY);
+                
+                
+                xQueueSend(xQueueResult, &result, portMAX_DELAY);
             }
         }
     }
@@ -230,13 +265,16 @@ void register_human_face_recognition(const QueueHandle_t frame_i,
                                      const QueueHandle_t event,
                                      const QueueHandle_t result,
                                      const QueueHandle_t frame_o,
-                                     const bool camera_fb_return)
+                                     const bool camera_fb_return,
+                                     const bool *guardingModePointer)
 {
     xQueueFrameI = frame_i;
     xQueueFrameO = frame_o;
     xQueueEvent = event;
     xQueueResult = result;
     gReturnFB = camera_fb_return;
+    guardingMode = guardingModePointer;
+
     xMutex = xSemaphoreCreateMutex();
 
     xTaskCreatePinnedToCore(task_process_handler, TAG, 4 * 1024, NULL, 5, NULL, 0);

@@ -716,6 +716,13 @@
                   <input type="button" value="Guarding mode" id="my_guarding">
                   Distance: <span id="my_distance"></span>
                 </div>
+                <div id="my_cam_controls">
+                  <input type="button" value="Enroll foe" id="my_learnFoe">
+                  <input type="button" value="Enroll friend" id="my_learnFriend">
+                  <input type="button" value="Delete face" id="my_unlearn">
+                  <input type="button" value="Recognize face" id="my_recognize">
+                  <input type="button" value="Show stream" id="my_stream">
+                </div>
             </div>
         </section>
         <script>
@@ -1157,7 +1164,10 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
 
   const buttons = {status: 0, timeoutId: -1}
-  for (const [index, element] of ["my_forward", "my_backward", "my_left", "my_right", "my_shoot", null, "my_guarding"].entries()) {
+  for (const [index, element] of [
+    "my_forward", "my_backward", "my_left", "my_right", "my_shoot", null, "my_guarding", null,
+    "my_learnFoe", "my_learnFriend", "my_unlearn", "my_recognize", null, null, null, null, null
+  ].entries()) {
     if(!element) {
       continue
     }
@@ -1195,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
   }
   setInterval(() => {
     updateDistance()
-  }, 2000);
+  }, 1000);
 })
         </script>
     </body>
