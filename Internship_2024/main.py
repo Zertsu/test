@@ -9,7 +9,7 @@ import StateMachineSWC
 import MotorSWC
 import GyroSWC
 import UltrasonicSWC
-import ColorsensorSWC  # Temporarily disabled, see ColorsensorSWC.py
+import ColorsensorSWC
 import EmergencySWC
 import BazookaSWC
 
@@ -31,7 +31,7 @@ def main():
     loop.create_task(MotorSWC.MotorSWC())
     loop.create_task(GyroSWC.GyroSWC())
     loop.create_task(UltrasonicSWC.UltrasonicSWC())
-    loop.create_task(ColorsensorSWC.ColorsensorSWC()) # Temporarily disabled, see ColorsensorSWC.py
+    loop.create_task(ColorsensorSWC.ColorsensorSWC())
     loop.create_task(EmergencySWC.EmergencySWC())
     loop.create_task(BazookaSWC.BazookaSWC())
     

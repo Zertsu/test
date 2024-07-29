@@ -9,24 +9,31 @@
 variables = {
     "ui8_Control_bits": 0,
     "b_Control_bits_valid":  False,
+    "S_face_position": (0, 0, 0),
 
     "si16_Angle":  0,
     "si16_Raw_angle":  0,
     "b_Angle_reset":   False,
 
     "f_Distance":  0,
+    "S_Max_distance_and_angle": (0, 0),
+    "f_avg_Distance": 0,
     "si16_Raw_distance":   0,
+    "b_Distance_reset": 0,
 
     "e_Raw_color": None,
     "e_Color": None,
 
     "si16_Motor_speed_left":   0,
     "si16_Motor_speed_right":  0,
+    "si16_turn_angle": 0,
 
     "b_Emergency_distance": False,
     "b_Emergency_timeout": False,
     "E_State": None,
     "b_Shoot": False,
+
+    "b_guarding_mode": False,
 }
 
 
@@ -37,20 +44,24 @@ variables = {
 # and the second inner list defines the variables the software component needs to write to the RTE.
 components = {
     "StateMachineSWC": [
-        ["ui8_Control_bits", "b_Emergency_distance", "b_Emergency_timeout", "b_Shoot"],
-        ["E_State", "b_Angle_reset"]
+        ["ui8_Control_bits", "b_Emergency_distance", "b_Emergency_timeout", "b_Shoot", "b_guarding_mode"],
+        ["E_State", "b_Angle_reset", "b_guarding_mode"]
+    ],
+    "GuardingStateMachineSWC": [
+        ["b_guarding_mode", "S_face_position", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle"],
+        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle"]
     ],
     "MotorSWC": [
-        ["E_State", "si16_Angle"],
-        ["si16_Motor_speed_left", "si16_Motor_speed_right"]
+        ["E_State", "si16_Angle", "si16_turn_angle"],
+        ["si16_Motor_speed_left", "si16_Motor_speed_right", "si16_turn_angle"]
     ],
     "GyroSWC": [
         ["si16_Raw_angle", "b_Angle_reset"],
         ["si16_Angle", "b_Angle_reset"]
     ],
     "UltrasonicSWC": [
-        ["si16_Raw_distance"],
-        ["f_Distance"]
+        ["si16_Raw_distance", "b_Distance_reset", "si16_Angle"],
+        ["f_Distance", "S_Max_distance_and_angle", "f_avg_Distance"]
     ],
     "ColorsensorSWC": [
         ["e_Raw_color"],
@@ -66,7 +77,7 @@ components = {
     ],
     "ComunicationHandler": [
         ["f_Distance"],
-        ["ui8_Control_bits", "b_Control_bits_valid"]
+        ["ui8_Control_bits", "b_Control_bits_valid", "S_face_position"]
     ],
     "IOHandler": [
         ["si16_Motor_speed_left", "si16_Motor_speed_right", "b_Shoot"],
