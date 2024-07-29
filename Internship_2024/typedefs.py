@@ -6,3 +6,4 @@ class States():
     TURN_LEFT = 4
     TURN_RIGHT = 5
     SHOOT = 6
+    TURN_ANGLE = 7

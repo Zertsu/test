@@ -101,6 +101,10 @@ def Rte_Read_GuardingStateMachineSWC_si16_turn_angle():
     global si16_turn_angle
     return si16_turn_angle
 
+def Rte_Read_GuardingStateMachineSWC_f_Distance():
+    global f_Distance
+    return f_Distance
+
 def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
