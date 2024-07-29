@@ -1,55 +1,40 @@
 #!/usr/bin/env pybricks-micropython
-from pybricks.hubs import EV3Brick
-from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
-                                 InfraredSensor, UltrasonicSensor, GyroSensor)
-from pybricks.parameters import Port, Stop, Direction, Button, Color
-from pybricks.tools import wait, StopWatch, DataLog
-from pybricks.robotics import DriveBase
-from pybricks.media.ev3dev import SoundFile, ImageFile
-
 import uasyncio as asyncio
-
 
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
 # Click "Open user guide" on the EV3 extension tab for more information.
 
+# SWC imports
+import StateMachineSWC
+import MotorSWC
+import GyroSWC
+import UltrasonicSWC
+import ColorsensorSWC
+import EmergencySWC
+import BazookaSWC
 
-# Create your objects here.
-ev3 = EV3Brick()
-
-# Initialize motors, ultrasonic sensor, and gyro sensor
-left_motor = Motor(Port.B)
-right_motor = Motor(Port.C)
-bazooka = Motor(Port.A)
-ultrasonic_sensor = UltrasonicSensor(Port.S4)
-gyro_sensor = GyroSensor(Port.S3)
-# Initialize the Color Sensor. It is used to detect the color of the objects.
-color_sensor = ColorSensor(Port.S1)
-
-async def state_machine():
-    global state
-    while True:
-        if state == States.IDLE:
-            if(check_first_entry() == True):
-                onEntry_Idle()
-            else:
-                if(checkTranitionNeeded_Idle() == True):
-                    onExit_Idle()
-                else :
-                    inState_Idle()
-        await asyncio.sleep_ms(50)  # Adjust sleep time as needed
-
-
-# Task to read ultrasonic sensor continuously
-async def read_ultrasonic_sensor():
-    while True:
-        
-        await asyncio.sleep_ms(15)  # Adjust sleep time as needed
+# Handlers
+import ComunicationHandler
+import IOHandler
 
 
 def main():
     loop = asyncio.get_event_loop()
-    loop.create_task(read_ultrasonic_sensor())
+    
+    # Handler tasks
+    loop.create_task(IOHandler.IOHandler())
+    loop.create_task(ComunicationHandler.ComunicationHandler_Recieve())
+    loop.create_task(ComunicationHandler.ComunicationHandler_Send())
+
+    # SWCs
+    loop.create_task(StateMachineSWC.state_machine())
+    loop.create_task(MotorSWC.MotorSWC())
+    loop.create_task(GyroSWC.GyroSWC())
+    loop.create_task(UltrasonicSWC.UltrasonicSWC())
+    loop.create_task(ColorsensorSWC.ColorsensorSWC())
+    loop.create_task(EmergencySWC.EmergencySWC())
+    loop.create_task(BazookaSWC.BazookaSWC())
+    
     
     loop.run_forever()
 
