@@ -48,7 +48,7 @@ components = {
         ["E_State", "b_Angle_reset", "b_guarding_mode"]
     ],
     "GuardingStateMachineSWC": [
-        ["b_guarding_mode", "S_face_position", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle"],
+        ["b_guarding_mode", "S_face_position", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
         ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle"]
     ],
     "MotorSWC": [
