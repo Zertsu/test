@@ -52,6 +52,7 @@ def obstycle():
     global left_obstycle
     global left_avg
     global run_time
+    global last_turn
     distance = Rte_Read_GuardingStateMachineSWC_f_Distance
 
     
@@ -97,9 +98,11 @@ def obstycle():
             if right_avg >= left_avg and right_obstycle[0] >= 100:
                 Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
                 Rte_Write_GuardingStateMachineSWC_si16_turn_angle(right_obstycle[1])
+                last_turn = TURN.RIGHT
             elif right_avg <= left_avg and left_obstycle[0] >= 100:
                 Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
                 Rte_Write_GuardingStateMachineSWC_si16_turn_angle(left_obstycle[1]-360)
+                last_turn = TURN.LEFT
             else:
                 Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
                 Rte_Write_GuardingStateMachineSWC_si16_turn_angle(180)
