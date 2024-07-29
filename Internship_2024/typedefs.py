@@ -10,7 +10,7 @@ class States():
 
 class GuardStates():
     SEARCH = 0
-    OBJECT = 1
+    OBSTYCLE = 1
     SHOOTING = 2
     ATTACKING = 3
 

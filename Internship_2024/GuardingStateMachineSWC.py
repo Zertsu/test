@@ -9,8 +9,11 @@ from typedefs import GuardStates
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
+global run_time
+run_time = 0
+
 global distance
-distance = 
+distance = 0
 
 global state
 state = States.IDLE
@@ -24,11 +27,123 @@ face_position = (0,0,0)
 global last_turn
 last_turn = TURN.RIGHT
 
-def attacking():
+global entry_number
+entry_number = 0
+
+global right_avg
+right_avg = 0
+
+global right_obstycle
+right_obstycle = (0,0)
+
+global left_avg
+left_avg = 0
+
+global left_obstycle
+left_obstycle (0,0)
+
+def obstycle():
+    global guard_state
+    global distance
+    global state
+    global entry_number 
+    global right_obstycle
+    global right_avg
+    global left_obstycle
+    global left_avg
+    global run_time
+    distance = Rte_Read_GuardingStateMachineSWC_f_Distance
+
+    
+    if distance < 40 and entry_number == 0:
+        guard_state = GuardStates.OBSTYCLE
+        entry_number = 1
+        state = State.IDLE
+        Rte_Write_GuardingStateMachineSWC_E_State(state)
+        Rte_Write_GuardingStateMachineSWC_b_Distance_reset(True)
+        Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+        Rte_Write_GuardingStateMachineSWC_si16_turn_angle(90)
+
+    elif entry_number == 1 and guard_state == GuardStates.OBSTYCLE
+        angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
+        if angle == 0:
+            right_obstycle = Rte_Read_GuardingStateMachineSWC_S_Max_distance_and_angle()
+            right_avg = Rte_Read_GuardingStateMachineSWC_f_avg_Distance()
+            entry_number = 2
+            Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+            Rte_Write_GuardingStateMachineSWC_si16_turn_angle(-90)
+
+    elif entry_number == 2 and guard_state == GuardStates.OBSTYCLE
+        angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
+        if angle == 0:
+            entry_number = 3
+            Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+            Rte_Write_GuardingStateMachineSWC_b_Distance_reset(True)
+            Rte_Write_GuardingStateMachineSWC_si16_turn_angle(-90)
+
+    elif entry_number == 3 and guard_state == GuardStates.OBSTYCLE
+        angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
+        if angle == 0:
+            left_obstycle = Rte_Read_GuardingStateMachineSWC_S_Max_distance_and_angle()
+            left_avg = Rte_Read_GuardingStateMachineSWC_f_avg_Distance
+            entry_number = 4
+            Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+            Rte_Write_GuardingStateMachineSWC_si16_turn_angle(90)
+
+    elif entry_number == 4 and guard_state == GuardStates.OBSTYCLE
+        angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
+        if angle == 0:
+            entry_number = 5
+            if right_avg >= left_avg and right_obstycle[0] >= 100:
+                Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+                Rte_Write_GuardingStateMachineSWC_si16_turn_angle(right_obstycle[1])
+            elif right_avg <= left_avg and left_obstycle[0] >= 100:
+                Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+                Rte_Write_GuardingStateMachineSWC_si16_turn_angle(left_obstycle[1]-360)
+            else:
+                Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+                Rte_Write_GuardingStateMachineSWC_si16_turn_angle(180)
+
+    elif entry_number == 5 and guard_state == GuardStates.OBSTYCLE
+        angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
+        if angle == 0:
+            if distance < 40 and entry_number == 5:
+                entry_number = 0
+                run_time = 0
+            else:
+                state = States.GO_FORWARD
+                Rte_Write_GuardingStateMachineSWC_E_State(state)
+                run_time = run_time + async_timer
+                if run_time == 20000:
+                    entry_number == 6
+
+    else: 
+        guard_state = GuardStates.SEARCH
+        run_time = 0
+        entry_number = 0
+        continue    
+
+
+def shooting():
     global face_position
-    global distance 
+    global state
+    if face_position[0] == 1:
+        # say something
+        state = States.SHOOT
+        Rte_Write_GuardingStateMachineSWC_E_State(state)
+        Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
+        continue
+    elif face_position[0] == 2:
+        # say something
+        Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
+        continue
+
+
+
+def attacking():
+    global face_position 
     if face_position[1] > 125 and face_position[1] < 130:
-        if distance > 50:
+        if face_position[2] > 10 and face_position[2]< 30:
             state = GO_FORWARD
             Rte_Write_GuardingStateMachineSWC_E_State(state)
             continue
@@ -49,7 +164,7 @@ def searching():
     global face_position
     global last_turn
     face_position = Rte_Read_GuardingStateMachineSWC_S_face_position
-    if  face_position[0] == False:
+    if face_position[0] == False:
         if last_turn == TURN.RIGHT:
             state = TURN_LEFT
             Rte_Write_GuardingStateMachineSWC_E_State(state)
@@ -58,7 +173,7 @@ def searching():
             state = TURN_RIGHT
             Rte_Write_GuardingStateMachineSWC_E_State(state)
             continue
-    elif face_position[0] == True:
+    else:
         guard_state = GuardStates.ATTACKING
         continue
 
@@ -69,6 +184,13 @@ async def guard_state_machine():
     while True: 
         guard_mode = Rte_Read_GuardingStateMachineSWC_b_guarding_mode
         if guard_mode:
-            if guard_state == GuardStates.SEARCH:
+            if guard_state == GuardStates.OBSTYCLE:
+                obstycle()
+            elif guard_state == GuardStates.SEARCH:
                 searching()
+            elif guard_state == GuardStates.ATTACKING:
+                attacking()
+            elif guard_state == GuardStates.SHOOTING:
+                shooting()
+            obstycle()
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
