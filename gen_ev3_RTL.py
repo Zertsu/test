@@ -43,7 +43,7 @@ variables = {
 # The first inner list defines the variables the software component needs to read from the RTE,
 # and the second inner list defines the variables the software component needs to write to the RTE.
 components = {
-    "ManualStateMachineSWC": [
+    "StateMachineSWC": [
         ["ui8_Control_bits", "b_Emergency_distance", "b_Emergency_timeout", "b_Shoot", "b_guarding_mode"],
         ["E_State", "b_Angle_reset", "b_guarding_mode"]
     ],

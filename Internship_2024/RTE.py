@@ -45,36 +45,36 @@ b_guarding_mode = False
 
 
 
-# ManualStateMachineSWC
-def Rte_Read_ManualStateMachineSWC_ui8_Control_bits():
+# StateMachineSWC
+def Rte_Read_StateMachineSWC_ui8_Control_bits():
     global ui8_Control_bits
     return ui8_Control_bits
 
-def Rte_Read_ManualStateMachineSWC_b_Emergency_distance():
+def Rte_Read_StateMachineSWC_b_Emergency_distance():
     global b_Emergency_distance
     return b_Emergency_distance
 
-def Rte_Read_ManualStateMachineSWC_b_Emergency_timeout():
+def Rte_Read_StateMachineSWC_b_Emergency_timeout():
     global b_Emergency_timeout
     return b_Emergency_timeout
 
-def Rte_Read_ManualStateMachineSWC_b_Shoot():
+def Rte_Read_StateMachineSWC_b_Shoot():
     global b_Shoot
     return b_Shoot
 
-def Rte_Read_ManualStateMachineSWC_b_guarding_mode():
+def Rte_Read_StateMachineSWC_b_guarding_mode():
     global b_guarding_mode
     return b_guarding_mode
 
-def Rte_Write_ManualStateMachineSWC_E_State(arg):
+def Rte_Write_StateMachineSWC_E_State(arg):
     global E_State
     E_State = arg
 
-def Rte_Write_ManualStateMachineSWC_b_Angle_reset(arg):
+def Rte_Write_StateMachineSWC_b_Angle_reset(arg):
     global b_Angle_reset
     b_Angle_reset = arg
 
-def Rte_Write_ManualStateMachineSWC_b_guarding_mode(arg):
+def Rte_Write_StateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
 
