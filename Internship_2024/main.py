@@ -5,7 +5,7 @@ import uasyncio as asyncio
 # Click "Open user guide" on the EV3 extension tab for more information.
 
 # SWC imports
-import ManualStateMachineSWC
+import StateMachineSWC
 import MotorSWC
 import GyroSWC
 import UltrasonicSWC
@@ -27,7 +27,7 @@ def main():
     loop.create_task(ComunicationHandler.ComunicationHandler_Send())
 
     # SWCs
-    loop.create_task(ManualStateMachineSWC.state_machine())
+    loop.create_task(StateMachineSWC.state_machine())
     loop.create_task(MotorSWC.MotorSWC())
     loop.create_task(GyroSWC.GyroSWC())
     loop.create_task(UltrasonicSWC.UltrasonicSWC())
