@@ -32,7 +32,7 @@ async def UltrasonicSWC():
         Rte_Write_UltrasonicSWC_f_Distance(distance_cm)
 
         # in case of a distance reset:
-        if distance_reset == 1:
+        if distance_reset == True:
             sum = 0
             counter = 0
             avg = 0.0
