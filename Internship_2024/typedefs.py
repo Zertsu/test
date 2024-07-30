@@ -7,3 +7,14 @@ class States():
     TURN_RIGHT = 5
     SHOOT = 6
     TURN_ANGLE = 7
+
+class GuardStates():
+    SEARCH = 0
+    OBSTYCLE = 1
+    SHOOTING = 2
+    ATTACKING = 3
+
+class TURN():
+    RIGHT = 0
+    LEFT = 1
+
