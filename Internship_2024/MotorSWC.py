@@ -26,6 +26,7 @@ async def MotorSWC():
     rightGuard = 0
     while True: 
         state = Rte_Read_MotorSWC_E_State()
+        angle = Rte_Read_MotorSWC_si16_Angle()
 
         # Write the motor speeds considering the guards
         if state == States.GO_FORWARD and forwardGuard <= 0:
@@ -44,6 +45,21 @@ async def MotorSWC():
             leftGuard = timeGuards["left-right"]
             Rte_Write_MotorSWC_si16_Motor_speed_left(motorSpeed)
             Rte_Write_MotorSWC_si16_Motor_speed_right(-motorSpeed)
+        # turn angle state:
+        elif state == States.TURN_ANGLE 
+            turn_angle = Rte_Read_MotorSWC_si16_turn_angle()
+            if angle > (turn_angle % 360) - 2 and angle < (turn_angle % 360) + 2:
+                turn_angle = 0
+                Rte_Write_MotorSWC_si16_turn_angle(turn_angle)
+            
+            elif turn_angle < 0:
+                Rte_Write_MotorSWC_si16_Motor_speed_left(-motorSpeed)
+                Rte_Write_MotorSWC_si16_Motor_speed_right(motorSpeed)
+            else:
+                Rte_Write_MotorSWC_si16_Motor_speed_right(-motorSpeed)
+                Rte_Write_MotorSWC_si16_Motor_speed_left(motorSpeed)
+            
+
         else:
             Rte_Write_MotorSWC_si16_Motor_speed_left(0)
             Rte_Write_MotorSWC_si16_Motor_speed_right(0)

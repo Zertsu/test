@@ -25,6 +25,7 @@ class PacketType():
     PONG = 1
     CONTROL = 2
     DISTANCE = 3
+    FACE_POSITION = 4
 
 async def ComunicationHandler_Recieve():
     global BIND_ADDRESS
@@ -70,6 +71,10 @@ def handlePacket(packet):
         return
     if packetType == PacketType.CONTROL:
         Rte_Write_ComunicationHandler_ui8_Control_bits(packetData[0])
+        return
+    if packetType == PacketType.FACE_POSITION:
+        facePosition = struct.unpack("!BBB", packetData)
+        Rte_Write_ComunicationHandler_S_face_position(facePosition)
         return
 
 
