@@ -17,11 +17,40 @@ devide_forcm = 10  #the value we have to devide to get the distance in cm
 # Task to read ultrasonic sensor continuously
 async def UltrasonicSWC():
     global async_timer
+    sum = 0
+    counter = 0
+    max_distance = 0
+    
     while True: 
         distance = Rte_Read_UltrasonicSWC_si16_Raw_distance()   #It will read in mm 
+        distance_reset = Rte_Read_UltrasonicSWC_b_Distance_reset()
+        angle = Rte_Read_UltrasonicSWC_si16_Angle()
+
         global devide_forcm
         # Transfer to cm based on requirement:
         distance_cm = distance / devide_forcm # the distance converted to cm
         Rte_Write_UltrasonicSWC_f_Distance(distance_cm)
+
+        # in case of a distance reset:
+        if distance_reset == True:
+            sum = 0
+            counter = 0
+            avg = 0.0
+            Rte_Write_UltrasonicSWC_f_avg_Distance(avg)
+            max_distance = 0
+            angle = 0
+            Rte_Write_UltrasonicSWC_S_Max_distance_and_angle((max_distance, angle))
+
+        # if new max
+        if distance_cm > max_distance:
+            max_distance = distance_cm
+            Rte_Write_UltrasonicSWC_S_Max_distance_and_angle((max_distance, angle))
+
+        # writing avg always
+        counter++
+        sum += distance_cm
+        avg = sum / counter
+        Rte_Write_UltrasonicSWC_f_avg_Distance(avg)
+
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time as needed
