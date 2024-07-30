@@ -71,9 +71,9 @@
 
                 figure img {
                     display: block;
-                    max-width: 100%;
-                    max-height: calc(100vh - 40px);
-                    width: auto;
+                    /* max-width: 100%; */
+                    /* max-height: calc(100vh - 40px); */
+                    /* width: auto; */
                     height: auto
                 }
 
@@ -325,7 +325,7 @@
 
             .image-container {
                 position: relative;
-                min-width: 160px
+                min-width: 160px;
             }
 
             .close {
@@ -375,6 +375,46 @@
 
             input.toggle-section-button:checked+section.toggle-section {
                 display: none
+            }
+
+
+            #my_controls {
+              display: grid;
+              width: 300px;
+              height: 300px;
+              grid-template-columns: repeat(3, 1fr);
+              grid-template-rows: repeat(5, 1fr);
+              grid-template-areas: 
+                "my_shoot          .           my_guarding"
+                "my_distance_label my_distance ."
+                ".                 my_forward  ."
+                "my_left           .           my_right"
+                ".                 my_backward . ";
+            }
+
+            #my_forward {grid-area: my_forward;}
+            #my_backward {grid-area: my_backward;}
+            #my_left {grid-area: my_left;}
+            #my_right {grid-area: my_right;}
+            #my_shoot {grid-area: my_shoot;}
+            #my_guarding {grid-area: my_guarding;}
+            #my_distance {grid-area: my_distance;}
+            #my_distance_label {grid-area: my_distance_label;}
+
+
+            #my_cam_controls {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+            }
+
+            @media (max-aspect-ratio: 2/3) {
+              #my_camera_div {
+                width: 100vw;
+              }
+
+              #my_controls {
+                width: 100vw;
+              }
             }
 
         </style>
@@ -700,28 +740,30 @@
 
                     </nav>
                 </div>
-                <figure>
-                    <div id="stream-container" class="image-container hidden">
-                        <a id="save-still" href="#" class="button save" download="capture.jpg">Save</a>
-                        <div class="close" id="close-stream">×</div>
-                        <img id="stream" src="" crossorigin>
-                    </div>
-                </figure>
-                <div id="my_controls">
-                  <input type="button" value="Forward" id="my_forward">
-                  <input type="button" value="Backward" id="my_backward">
-                  <input type="button" value="Left" id="my_left">
-                  <input type="button" value="Right" id="my_right">
-                  <input type="button" value="Shoot" id="my_shoot">
-                  <input type="button" value="Guarding mode" id="my_guarding">
-                  Distance: <span id="my_distance"></span>
+                <div id="my_camera_div">
+                  <div id="my_cam_controls">
+                    <button id="my_learnFoe">Enroll foe</button>
+                    <button id="my_learnFriend">Enroll friend</button>
+                    <button id="my_unlearn">Delete face</button>
+                    <button id="my_recognize">Recognize face</button>
+                    <button id="my_stream">Show stream</button>
+                  </div>
+                  <figure>
+                      <div id="stream-container" class="image-container">
+                          <a id="save-still" href="#" class="button save hidden" download="capture.jpg">Save</a>
+                          <div class="close hidden" id="close-stream">×</div>
+                          <img id="stream" src="" crossorigin>
+                      </div>
+                  </figure>
                 </div>
-                <div id="my_cam_controls">
-                  <input type="button" value="Enroll foe" id="my_learnFoe">
-                  <input type="button" value="Enroll friend" id="my_learnFriend">
-                  <input type="button" value="Delete face" id="my_unlearn">
-                  <input type="button" value="Recognize face" id="my_recognize">
-                  <input type="button" value="Show stream" id="my_stream">
+                <div id="my_controls">
+                  <button id="my_forward">Forward</button>
+                  <button id="my_backward">Backward</button>
+                  <button id="my_left">Left</button>
+                  <button id="my_right">Right</button>
+                  <button id="my_shoot">Shoot</button>
+                  <button id="my_guarding">Guarding mode</button>
+                  <span id="my_distance_label">Distance: </span><span id="my_distance"></span>
                 </div>
             </div>
         </section>
@@ -1028,15 +1070,19 @@ document.addEventListener('DOMContentLoaded', function (event) {
   const saveButton = document.getElementById('save-still')
   const ledGroup = document.getElementById('led-group')
 
+  const myStreamButton = document.getElementById("my_stream")
+
   const stopStream = () => {
     window.stop();
     streamButton.innerHTML = 'Start Stream'
+    myStreamButton.innerHTML = 'Start Stream'
   }
 
   const startStream = () => {
     view.src = `${streamUrl}/stream`
     show(viewContainer)
     streamButton.innerHTML = 'Stop Stream'
+    myStreamButton.innerHTML = 'Stop Stream'
   }
 
   // Attach actions to buttons
@@ -1172,14 +1218,27 @@ document.addEventListener('DOMContentLoaded', function (event) {
       continue
     }
     const domElement = document.getElementById(element)
-    domElement.addEventListener("mousedown", e => {
+    const onDownEvent = e => {
+      e.preventDefault()
       buttons.status |= 1 << index
       sendButtons()
-    })
-    domElement.addEventListener("mouseup", e => {
+    }
+    const onUpEvent = e => {
       buttons.status &= ~(1 << index)
       sendButtons()
-    })
+    }
+    const onLeaveEvent = e => {
+      if (buttons.status & (1 << index)) {
+        buttons.status &= ~(1 << index)
+        sendButtons()
+      }
+    }
+    domElement.addEventListener("mousedown", onDownEvent)
+    domElement.addEventListener("touchstart", onDownEvent)
+    domElement.addEventListener("mouseup", onUpEvent)
+    domElement.addEventListener("touchend", onUpEvent)
+    domElement.addEventListener("mouseleave", onLeaveEvent)
+    domElement.addEventListener("touchcancel", onLeaveEvent)
   }
 
   function sendButtons() {
@@ -1198,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
     fetch("/distance").then(function (response) {
       return response.arrayBuffer();
     }).then(function (data) {
-      distanceEl.innerText = new DataView(data).getFloat32(0, false)
+      distanceEl.innerText = new DataView(data).getFloat32(0, false).toFixed(1)
     }).catch(function (err) {
       console.log('Fetch Error :-S', err);
     });
@@ -1206,6 +1265,11 @@ document.addEventListener('DOMContentLoaded', function (event) {
   setInterval(() => {
     updateDistance()
   }, 1000);
+
+
+  document.getElementById("my_stream").addEventListener("click", e => {
+    streamButton.onclick()
+  })
 })
         </script>
     </body>
