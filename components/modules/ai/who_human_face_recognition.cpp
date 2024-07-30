@@ -20,6 +20,8 @@
 
 #include "who_ai_utils.hpp"
 
+#include "dl_math.hpp"
+
 using namespace std;
 using namespace dl;
 
@@ -105,7 +107,8 @@ static void task_process_handler(void *arg)
 
     bool lastFrameHadFace = false;
     bool recoginzedFoe = false;
-    recognizer_position_t result;
+    bool recognizedFriend = false;
+    recognizer_position_t positions_result;
 
     while (true)
     {
@@ -150,6 +153,7 @@ static void task_process_handler(void *arg)
                         if(recognize_result.id > 0) {
                             ESP_LOGI("RECOGNIZE", "Similarity: %f, Match ID: %d, %s", recognize_result.similarity, recognize_result.id, isFoe ? "foe" : "friend");
                             recoginzedFoe = isFoe;
+                            recognizedFriend = recognize_result.name.compare("fr") == 0;
                         } else {
                             ESP_LOGE("RECOGNIZE", "Similarity: %f, Match ID: %d, %s", recognize_result.similarity, recognize_result.id, isFoe ? "foe" : "friend");
                         }
@@ -169,6 +173,7 @@ static void task_process_handler(void *arg)
                 } else {
                     lastFrameHadFace = false;
                     recoginzedFoe = false;
+                    recognizedFriend = false;
                 }
 
 
@@ -211,17 +216,28 @@ static void task_process_handler(void *arg)
                     draw_detection_result((uint16_t *)frame->buf, frame->height, frame->width, detect_results);
                 }
 
-                if(recoginzedFoe) {
-                    result.valid = 1;
+                if(recoginzedFoe || recognizedFriend) {
+                    positions_result.valid = recoginzedFoe ? 1 : 2;
                     int divisorHorizontal = frame->width / 255;
                     int divisorVertical = frame->width / 255;
                     
-                    result.x = detect_results.front().keypoint[4] / divisorHorizontal;
-                    result.y = detect_results.front().keypoint[5] / divisorVertical;
+                    int leftEyeX = detect_results.front().keypoint[0];
+                    int leftEyeY = detect_results.front().keypoint[1];
+                    int rightEyeX = detect_results.front().keypoint[6];
+                    int rightEyeY = detect_results.front().keypoint[7];
+
+                    float eyesDistanceSquared = dl::math::power(leftEyeX - rightEyeX, 2) + dl::math::power(leftEyeY - rightEyeY, 2);
+
+                    // Copied sqrt method from "components/esp-dl/include/math/dl_math.hpp", calling it doesn't work
+                    int sqrtTemp = 0x1fbb4000 + (*(int *)&eyesDistanceSquared >> 1);
+                    float eyesDistance = *(float *)(&sqrtTemp);
+
+                    positions_result.x = detect_results.front().keypoint[4] / divisorHorizontal;
+                    positions_result.eyes = (char)(eyesDistance / divisorHorizontal); // Technically could overflow, but probably never will
                 } else {
-                    result.valid = 0;
-                    result.x = 0;
-                    result.y = 0;
+                    positions_result.valid = 0;
+                    positions_result.x = 0;
+                    positions_result.eyes = 0;
                 }
             }
 
@@ -243,7 +259,7 @@ static void task_process_handler(void *arg)
             {
                 
                 
-                xQueueSend(xQueueResult, &result, portMAX_DELAY);
+                xQueueSend(xQueueResult, &positions_result, portMAX_DELAY);
             }
         }
     }

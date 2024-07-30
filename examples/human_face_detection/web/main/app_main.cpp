@@ -232,7 +232,7 @@ static void task_udpRecognitionSender(void *arg) {
         if(readyToSend) {
             buff[1] = facePosition.valid;
             buff[2] = facePosition.x;
-            buff[3] = facePosition.y;
+            buff[3] = facePosition.eyes;
             buff[0] = 4;
             sendto(sock, buff, 4, 0, &robotAddr, sizeof(robotAddr));
         }

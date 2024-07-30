@@ -19,7 +19,7 @@ typedef struct
 {
     char valid;
     char x;
-    char y;
+    char eyes;
 } recognizer_position_t;
 
 void register_human_face_recognition(QueueHandle_t frame_i,
