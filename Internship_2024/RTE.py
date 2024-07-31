@@ -21,6 +21,7 @@ global b_Emergency_timeout
 global E_State
 global b_Shoot
 global b_guarding_mode
+global b_guarding_emergency
 
 ui8_Control_bits = 0
 b_Control_bits_valid = False
@@ -45,6 +46,7 @@ b_Emergency_timeout = False
 E_State = None
 b_Shoot = False
 b_guarding_mode = False
+b_guarding_emergency = False
 
 
 
@@ -148,6 +150,10 @@ def Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(arg):
     global ui16_motor_speed
     ui16_motor_speed = arg
 
+def Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(arg):
+    global b_guarding_emergency
+    b_guarding_emergency = arg
+
 
 
 # MotorSWC
@@ -246,6 +252,10 @@ def Rte_Read_EmergencySWC_b_Control_bits_valid():
 def Rte_Read_EmergencySWC_f_Distance():
     global f_Distance
     return f_Distance
+
+def Rte_Read_EmergencySWC_b_guarding_emergency():
+    global b_guarding_emergency
+    return b_guarding_emergency
 
 def Rte_Write_EmergencySWC_b_Emergency_distance(arg):
     global b_Emergency_distance
