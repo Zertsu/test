@@ -13,14 +13,14 @@ async_timer = 50 # this variable stores the time in ms that we use in asyncio.sl
 # Task to read gyroscopic sensor continuously
 async def GyroSWC():
     global async_timer
+    reset_angle = 0 #The angle we do the reset with
     while True: 
 
-        gyro_sensor_value = Rte_Read_GyroSWC_si16_Raw_angle()   # this gets the gyro senzors raw value
-        reset_angle = 0 #The angle we do the reset with
+        gyro_sensor_value = Rte_Read_GyroSWC_si16_Raw_angle()   # this gets the gyro senzors raw value   
         angle_reset_bit = Rte_Read_GyroSWC_b_Angle_reset()  #this gets the information if we need to reset the angel
-
+    
         if angle_reset_bit:  #The bit that we get from RTE telling us we need to reset
-            Rte_Write_GyroSWC_b_Angle_reset(reset_angle)    #Once we're done, we set it back to 0
+            Rte_Write_GyroSWC_b_Angle_reset(False)    #Once we're done, we set it back to 0
             reset_angle = gyro_sensor_value  #The "new 0" becomes the current angle from gyro
         
         gyro_sensor_value = gyro_sensor_value - reset_angle

@@ -45,7 +45,7 @@ b_Emergency_distance = False
 b_Emergency_timeout = False
 E_State = None
 b_Shoot = False
-b_guarding_mode = False
+b_guarding_mode = True
 b_guarding_emergency = False
 
 
@@ -110,6 +110,10 @@ def Rte_Read_GuardingStateMachineSWC_S_face():
     global S_face
     return S_face
 
+def Rte_Read_GuardingStateMachineSWC_b_Angle_reset():
+    global b_Angle_reset
+    return b_Angle_reset
+
 def Rte_Read_GuardingStateMachineSWC_S_Max_distance_and_angle():
     global S_Max_distance_and_angle
     return S_Max_distance_and_angle
@@ -133,6 +137,10 @@ def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
 def Rte_Write_GuardingStateMachineSWC_E_State(arg):
     global E_State
     E_State = arg
+
+def Rte_Write_GuardingStateMachineSWC_b_Angle_reset(arg):
+    global b_Angle_reset
+    b_Angle_reset = arg
 
 def Rte_Write_GuardingStateMachineSWC_b_Angle_reset(arg):
     global b_Angle_reset
@@ -222,6 +230,10 @@ def Rte_Read_UltrasonicSWC_si16_Angle():
 def Rte_Write_UltrasonicSWC_f_Distance(arg):
     global f_Distance
     f_Distance = arg
+
+def Rte_Write_UltrasonicSWC_b_Distance_reset(arg):
+    global b_Distance_reset
+    b_Distance_reset = arg
 
 def Rte_Write_UltrasonicSWC_S_Max_distance_and_angle(arg):
     global S_Max_distance_and_angle

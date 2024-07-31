@@ -10,7 +10,7 @@ import uasyncio as asyncio
 from pybricks.hubs import EV3Brick
 from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
                                  InfraredSensor, UltrasonicSensor, GyroSensor)
-from pybricks.parameters import Stop, Port
+from pybricks.parameters import Stop, Port, Direction
 
 from pybricks.media.ev3dev import SoundFile
 
@@ -37,7 +37,7 @@ async def IOHandler():
     right_motor = Motor(RIGHT_MOTOR_PORT)
     bazooka = Motor(BAZOOKA_MOTOR_PORT)
     ultrasonic_sensor = UltrasonicSensor(ULTRASONIC_SENSOR_PORT)
-    gyro_sensor = GyroSensor(GYRO_SENSOR_PORT)
+    gyro_sensor = GyroSensor(GYRO_SENSOR_PORT, Direction.COUNTERCLOCKWISE)
     color_sensor = ColorSensor(COLOR_SENSOR_PORT)
 
     #initializing the previos_shoot, shoot_state 
