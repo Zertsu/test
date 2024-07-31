@@ -12,6 +12,9 @@ from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
                                  InfraredSensor, UltrasonicSensor, GyroSensor)
 from pybricks.parameters import Stop, Port
 
+from pybricks.media.ev3dev import SoundFile
+
+
 # Create your objects here.
 ev3 = EV3Brick()
 
@@ -84,3 +87,23 @@ async def IOHandler():
         previous_shoot = shoot
 
         await asyncio.sleep_ms(async_timer)
+
+
+# various sounds to be called by state machine
+
+
+
+def soundCrying():
+    ev3.speaker.play_file(SoundFile.CRYING)
+
+def soundObject():
+    ev3.speaker.play_file(SoundFile.OBJECT)
+
+def soundSearching():
+    ev3.speaker.play_file(SoundFile.SEARCHING)
+
+def soundHi():
+    ev3.speaker.play_file(SoundFile.HI)
+
+def soundGameOver():
+    ev3.speaker.play_file(SoundFile.GAME_OVER)
