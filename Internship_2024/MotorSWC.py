@@ -27,6 +27,7 @@ async def MotorSWC():
     while True: 
         state = Rte_Read_MotorSWC_E_State()
         angle = Rte_Read_MotorSWC_si16_Angle()
+        motorSpeed = Rte_Read_MotorSWC_ui16_motor_speed()
 
         # Write the motor speeds considering the guards
         if state == States.GO_FORWARD and forwardGuard <= 0:
