@@ -15,11 +15,13 @@ global e_Color
 global si16_Motor_speed_left
 global si16_Motor_speed_right
 global si16_turn_angle
+global ui16_motor_speed
 global b_Emergency_distance
 global b_Emergency_timeout
 global E_State
 global b_Shoot
 global b_guarding_mode
+global b_guarding_emergency
 
 ui8_Control_bits = 0
 b_Control_bits_valid = False
@@ -38,11 +40,13 @@ e_Color = None
 si16_Motor_speed_left = 0
 si16_Motor_speed_right = 0
 si16_turn_angle = 0
+ui16_motor_speed = 100
 b_Emergency_distance = False
 b_Emergency_timeout = False
 E_State = None
 b_Shoot = False
 b_guarding_mode = False
+b_guarding_emergency = False
 
 
 
@@ -91,6 +95,10 @@ def Rte_Write_StateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
 
+def Rte_Write_StateMachineSWC_ui16_motor_speed(arg):
+    global ui16_motor_speed
+    ui16_motor_speed = arg
+
 
 
 # GuardingStateMachineSWC
@@ -138,6 +146,14 @@ def Rte_Write_GuardingStateMachineSWC_si16_turn_angle(arg):
     global si16_turn_angle
     si16_turn_angle = arg
 
+def Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(arg):
+    global ui16_motor_speed
+    ui16_motor_speed = arg
+
+def Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(arg):
+    global b_guarding_emergency
+    b_guarding_emergency = arg
+
 
 
 # MotorSWC
@@ -152,6 +168,10 @@ def Rte_Read_MotorSWC_si16_Angle():
 def Rte_Read_MotorSWC_si16_turn_angle():
     global si16_turn_angle
     return si16_turn_angle
+
+def Rte_Read_MotorSWC_ui16_motor_speed():
+    global ui16_motor_speed
+    return ui16_motor_speed
 
 def Rte_Write_MotorSWC_si16_Motor_speed_left(arg):
     global si16_Motor_speed_left
@@ -233,6 +253,10 @@ def Rte_Read_EmergencySWC_f_Distance():
     global f_Distance
     return f_Distance
 
+def Rte_Read_EmergencySWC_b_guarding_emergency():
+    global b_guarding_emergency
+    return b_guarding_emergency
+
 def Rte_Write_EmergencySWC_b_Emergency_distance(arg):
     global b_Emergency_distance
     b_Emergency_distance = arg
@@ -301,4 +325,3 @@ def Rte_Write_IOHandler_e_Raw_color(arg):
 def Rte_Write_IOHandler_b_Shoot(arg):
     global b_Shoot
     b_Shoot = arg
-
