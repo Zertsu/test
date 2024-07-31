@@ -1,5 +1,6 @@
 global ui8_Control_bits
 global b_Control_bits_valid
+global S_face
 global S_face_position
 global si16_Angle
 global si16_Raw_angle
@@ -22,7 +23,8 @@ global b_guarding_mode
 
 ui8_Control_bits = 0
 b_Control_bits_valid = False
-S_face_position = (0, 0, 0)
+S_face = (0, 0, 0)
+S_face_position = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 si16_Angle = 0
 si16_Raw_angle = 0
 b_Angle_reset = False
@@ -42,6 +44,17 @@ E_State = None
 b_Shoot = False
 b_guarding_mode = False
 
+
+
+
+# FaceProcessorSWC
+def Rte_Read_FaceProcessorSWC_S_face_position():
+    global S_face_position
+    return S_face_position
+
+def Rte_Write_FaceProcessorSWC_S_face(arg):
+    global S_face
+    S_face = arg
 
 
 
@@ -85,9 +98,9 @@ def Rte_Read_GuardingStateMachineSWC_b_guarding_mode():
     global b_guarding_mode
     return b_guarding_mode
 
-def Rte_Read_GuardingStateMachineSWC_S_face_position():
-    global S_face_position
-    return S_face_position
+def Rte_Read_GuardingStateMachineSWC_S_face():
+    global S_face
+    return S_face
 
 def Rte_Read_GuardingStateMachineSWC_S_Max_distance_and_angle():
     global S_Max_distance_and_angle
