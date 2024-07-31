@@ -34,6 +34,7 @@ variables = {
     "si16_Motor_speed_left":   0,
     "si16_Motor_speed_right":  0,
     "si16_turn_angle": 0,
+    "ui16_motor_speed": 100,
 
     "b_Emergency_distance": False,
     "b_Emergency_timeout": False,
@@ -56,14 +57,14 @@ components = {
     ],
     "StateMachineSWC": [
         ["ui8_Control_bits", "b_Emergency_distance", "b_Emergency_timeout", "b_Shoot", "b_guarding_mode"],
-        ["E_State", "b_Angle_reset", "b_guarding_mode"]
+        ["E_State", "b_Angle_reset", "b_guarding_mode", "ui16_motor_speed"]
     ],
     "GuardingStateMachineSWC": [
         ["b_guarding_mode", "S_face", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
-        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle"]
+        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed"]
     ],
     "MotorSWC": [
-        ["E_State", "si16_Angle", "si16_turn_angle"],
+        ["E_State", "si16_Angle", "si16_turn_angle", "ui16_motor_speed"],
         ["si16_Motor_speed_left", "si16_Motor_speed_right", "si16_turn_angle"]
     ],
     "GyroSWC": [
