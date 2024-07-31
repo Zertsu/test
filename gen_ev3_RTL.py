@@ -9,8 +9,15 @@
 variables = {
     "ui8_Control_bits": 0,
     "b_Control_bits_valid":  False,
-    "S_face_position": (0, 0, 0),
-
+    "S_face": (0, 0, 0),
+            # (Enum: No face/enemy/frined, x position, distance between eyes)
+    "S_face_position": (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            # (Enum: no face/enemy/friend,
+            # frameW, frameH, 
+            # boxX, boxY, boxW, boxH, 
+            # noseX, noseY,
+            # l_eyeX, l_eyeY, r_eyeX, r_eyeY, 
+            # l_mouthX, l_mouthY, r_mouthX, r_mouthY)
     "si16_Angle":  0,
     "si16_Raw_angle":  0,
     "b_Angle_reset":   False,
@@ -43,12 +50,16 @@ variables = {
 # The first inner list defines the variables the software component needs to read from the RTE,
 # and the second inner list defines the variables the software component needs to write to the RTE.
 components = {
+    "FaceProcessorSWC": [
+        ["S_face_position"],
+        ["S_face"]
+    ],
     "StateMachineSWC": [
         ["ui8_Control_bits", "b_Emergency_distance", "b_Emergency_timeout", "b_Shoot", "b_guarding_mode"],
         ["E_State", "b_Angle_reset", "b_guarding_mode"]
     ],
     "GuardingStateMachineSWC": [
-        ["b_guarding_mode", "S_face_position", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
+        ["b_guarding_mode", "S_face", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
         ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle"]
     ],
     "MotorSWC": [
