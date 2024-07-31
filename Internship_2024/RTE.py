@@ -325,4 +325,3 @@ def Rte_Write_IOHandler_e_Raw_color(arg):
 def Rte_Write_IOHandler_b_Shoot(arg):
     global b_Shoot
     b_Shoot = arg
-
