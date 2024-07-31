@@ -42,6 +42,7 @@ variables = {
     "b_Shoot": False,
 
     "b_guarding_mode": False,
+    "b_guarding_emergency": False,
 }
 
 
@@ -61,7 +62,7 @@ components = {
     ],
     "GuardingStateMachineSWC": [
         ["b_guarding_mode", "S_face", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
-        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed"]
+        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed", "b_guarding_emergency"]
     ],
     "MotorSWC": [
         ["E_State", "si16_Angle", "si16_turn_angle", "ui16_motor_speed"],
@@ -80,7 +81,7 @@ components = {
         ["e_Color"]
     ],
     "EmergencySWC": [
-        ["b_Control_bits_valid", "f_Distance"],
+        ["b_Control_bits_valid", "f_Distance", "b_guarding_emergency"],
         ["b_Emergency_distance", "b_Emergency_timeout"]
     ],
     "BazookaSWC": [
