@@ -130,6 +130,10 @@ def Rte_Read_GuardingStateMachineSWC_f_Distance():
     global f_Distance
     return f_Distance
 
+def Rte_Read_GuardingStateMachineSWC_b_Angle_reset():
+    global b_Angle_reset
+    return b_Angle_reset
+
 def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
