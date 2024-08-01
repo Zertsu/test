@@ -16,8 +16,21 @@ from typedefs import TURN
 # initialization for the variables
 # !!!!! DO NOT DELETE ANY OF THEM BEFORE MAKING SURE IT IS NOT USED ANYMORE !!!!! ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#region globals
+
+class SearchFlag():
+    reset = 0
+    half_turn = 1
+    full_turn = 2
+
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
+
+global search_flag 
+search_flag = 0 # chacking if we are in search mode for too long
+
+global enter_guard_mode
+enter_guard_mode = False # stores if we are entering guarding mode
 
 global run_time
 run_time = 0 # we use it to count the Running time in obstycle avoidance mode 
@@ -94,6 +107,7 @@ motor_speed_fast = 100 # fast motot speed for obstycle avoidance
 global max_eye_margin
 max_eye_margin = 40 # maximum distance between the eyes
 
+#endregion
 
 # end of global variables
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,6 +116,7 @@ def obstycle():
 
     # global variabals
     global guard_state
+    global search_flag 
     global motor_speed_fast
     global distance
     global state
@@ -144,7 +159,7 @@ def obstycle():
         Rte_Write_GuardingStateMachineSWC_E_State(state)
         Rte_Write_GuardingStateMachineSWC_b_Distance_reset(True)
         Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
-
+        Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.OBJECT)
         state = States.TURN_ANGLE
         Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_fast)
         Rte_Write_GuardingStateMachineSWC_E_State(state)
@@ -230,12 +245,13 @@ def obstycle():
                 if in_box_flag == not_in_box:
                     in_box_flag = maybe_in_box
                 elif in_box_flag == maybe_in_box:
-                    Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
                     state = States.IDLE
                     Rte_Write_GuardingStateMachineSWC_E_State(state)
                     Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(True)
                     guard_state = GuardStates.SEARCH
+                    search_flag = SearchFlag.reset
                     in_box_flag = not_in_box
+                    Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.CRYING)
 
 
     elif entry_number == turning_correctly and guard_state == GuardStates.OBSTYCLE:
@@ -245,6 +261,7 @@ def obstycle():
         if angle == 0:
             if distance < emergency_distance and entry_number == turning_correctly:
                 entry_number = no_obstycle
+                Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.OBJECT)
                 run_time = 0
                 stay = True
             else:
@@ -260,15 +277,16 @@ def obstycle():
 
     elif entry_number == moovement_done and guard_state == GuardStates.OBSTYCLE:
         guard_state = GuardStates.SEARCH
+        search_flag = SearchFlag.reset
         run_time = 0
         entry_number = no_obstycle
         stay = True
     else: 
         guard_state = GuardStates.SEARCH
+        search_flag = SearchFlag.reset
         run_time = 0
         entry_number = no_obstycle
         stay = True
-
 
 def shooting():
 
@@ -286,18 +304,26 @@ def shooting():
         # say something
         state = States.SHOOT
         Rte_Write_GuardingStateMachineSWC_E_State(state)
+        Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.GAMEOVER)
         Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
+        state = States.IDLE
+        Rte_Write_GuardingStateMachineSWC_E_State(state)
         guard_state = GuardStates.SEARCH
+        search_flag = SearchFlag.reset
         
     elif face_position[0] == friend:
-        # say something
+        Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.HI)
         Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
+        state = States.IDLE
+        Rte_Write_GuardingStateMachineSWC_E_State(state)
         guard_state = GuardStates.SEARCH
+        search_flag = SearchFlag.reset
         
 def attacking():
 
     # global variabals
     global async_timer
+    global search_flag 
     global face_position
     global left_face_margin
     global motor_speed_slow
@@ -316,7 +342,6 @@ def attacking():
         # checking if we are close enough to shoot
         if face_position[2] < max_eye_margin:
             state = States.GO_FORWARD
-            print(face_position[2])
             Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_slow)
             Rte_Write_GuardingStateMachineSWC_E_State(state)
             
@@ -332,6 +357,7 @@ def attacking():
         idle_time = idle_time + async_timer
         if idle_time == max_idle_time:
             guard_state = GuardStates.SEARCH
+            search_flag = SearchFlag.reset
 
     elif face_position[1] < left_face_margin:
         state = States.TURN_RIGHT
@@ -349,12 +375,33 @@ def searching():
 
     # global variabals
     global guard_state
+    global search_flag 
     global face_position
     global last_turn
     global motor_speed_slow
 
     # local variables
     no_face = 0
+    angle_delay = 2
+
+    if search_flag == SearchFlag.reset:
+        Rte_Write_GuardingStateMachineSWC_b_Angle_reset(True)
+        Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.SEARCHING)
+        search_flag = SearchFlag.half_turn
+    if search_flag == SearchFlag.half_turn:
+        angle = Rte_Read_GuardingStateMachineSWC_si16_Angle()
+        if angle < 180 + angle_delay and angle > 180 - angle_delay:
+            search_flag = SearchFlag.full_turn
+    if search_flag == SearchFlag.full_turn:
+        angle = Rte_Read_GuardingStateMachineSWC_si16_Angle()
+        if angle < 0 + angle_delay and angle > 360 - angle_delay:
+            Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFile.CRYING)
+            Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
+            state = States.IDLE
+            Rte_Write_GuardingStateMachineSWC_E_State(state)
+            guard_state = GuardStates.SEARCH
+            search_flag = SearchFlag.reset
+            
 
     # getting data from RTE to a global variable
     face_position = Rte_Read_GuardingStateMachineSWC_S_face()
@@ -374,21 +421,27 @@ def searching():
     else:
         guard_state = GuardStates.ATTACKING
         
-
-
 async def guard_state_machine():
 
     # global variabals
     global async_timer
+    global enter_guard_mode
     global guard_state
+    global search_flag 
     await asyncio.sleep_ms(first_sleep)  # Adjust sleep time later if needed
     while True: 
 
         # getting data from RTE to a local variable
         guard_mode = Rte_Read_GuardingStateMachineSWC_b_guarding_mode()
-
+        if guard_mode != enter_guard_mode and guard_mode:
+            enter_guard_mode = not enter_guard_mode
+            guard_state = GuardStates.SEARCH
+            search_flag = SearchFlag.reset
+            #print guard_state with log
+        elif guard_mode != enter_guard_mode and not guard_mode:
+            enter_guard_mode = not enter_guard_mode
         # checking in what state we are and calling the functions accordingly
-        if guard_mode:
+        elif guard_mode:
             # print("Guard state:", guard_state)
             if guard_state == GuardStates.OBSTYCLE:
                 obstycle()

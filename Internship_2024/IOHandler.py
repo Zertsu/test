@@ -52,7 +52,7 @@ async def IOHandler():
         motor_speed_left = Rte_Read_IOHandler_si16_Motor_speed_left()  # gets the left motors value from RTE
         motor_speed_right = Rte_Read_IOHandler_si16_Motor_speed_right()  # gets the right motors value from RTE
         shoot = Rte_Read_IOHandler_b_Shoot()  #  gets the shoot bit from RTE
-        
+        sound = Rte_Read_IOHandler_E_play_sound()
 
         # telling the bazooka to shoot
         if shoot and previous_shoot == False:
@@ -85,6 +85,31 @@ async def IOHandler():
         
 
         previous_shoot = shoot
+
+        if sound == SoundFile.CRYING:
+            soundCrying()
+            sound = SoundFile.NONE
+            Rte_Write_IOHandler_E_play_sound(sound)
+
+        elif sound == SoundFile.OBJECT:
+            soundObject()
+            sound = SoundFile.NONE
+            Rte_Write_IOHandler_E_play_sound(sound)
+
+        elif sound == SoundFile.SEARCHING:
+            soundSearching()
+            sound = SoundFile.NONE
+            Rte_Write_IOHandler_E_play_sound(sound)
+
+        elif sound == SoundFile.HI:
+            soundHi()
+            sound = SoundFile.NONE
+            Rte_Write_IOHandler_E_play_sound(sound)
+
+        elif sound == SoundFile.GAMEOVER:
+            soundGameOver()
+            sound = SoundFile.NONE
+            Rte_Write_IOHandler_E_play_sound(sound)
 
         await asyncio.sleep_ms(async_timer)
 
