@@ -83,7 +83,7 @@ components = {
     ],
     "EmergencySWC": [
         ["b_Control_bits_valid", "f_Distance", "b_guarding_emergency"],
-        ["b_Emergency_distance", "b_Emergency_timeout", "b_guarding_mode"]
+        ["b_Emergency_distance", "b_Emergency_timeout", "b_guarding_emergency", "b_guarding_mode"]
     ],
     "BazookaSWC": [
         ["E_State"],
