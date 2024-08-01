@@ -11,21 +11,23 @@ async_timer = 50 # this variable stores the time in ms that we use in asyncio.sl
 global emergency_bit
 emergency_bit = False  # this variable stores the value of the emergency bit
 
-
 global distance_emergency
 distance_emergency = 10  # this variable stores the distance in cm that is the emergency distance
 
+global guarding_emergency
+guarding_emergency = False # This variable checks the guarding emergency
 
 async def EmergencySWC():
     global async_timer
     while True: 
         connectionTimedOut = Rte_Read_EmergencySWC_b_Control_bits_valid() # tells us when the connection is timed out
         distance = Rte_Read_EmergencySWC_f_Distance() # gets the distance from the ultrasonic senzor
-        guarding_emergency = Rte_Read_EmergencySWC_b_guarding_emergency() # gets if we are in guarding emergency (in a box)
+        global guarding_emergency
         global emergency_bit
         global distance_emergency
         global timeout
-
+        guarding_emergency = Rte_Read_EmergencySWC_b_guarding_emergency() # gets if we are in guarding emergency (in a box)
+        
         if distance < distance_emergency:  
             emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
@@ -38,5 +40,11 @@ async def EmergencySWC():
             emergency_bit = False      
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
+
+        if guarding_emergency:
+            guarding_emergency = False
+            Rte_Write_EmergencySWC_b_guarding_mode(False)
+            Rte_Write_EmergencySWC_b_guarding_emergency(guarding_emergency)
+
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
