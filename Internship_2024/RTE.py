@@ -132,6 +132,10 @@ def Rte_Read_GuardingStateMachineSWC_f_Distance():
     global f_Distance
     return f_Distance
 
+def Rte_Read_GuardingStateMachineSWC_si16_Angle():
+    global si16_Angle
+    return si16_Angle
+
 def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
@@ -159,10 +163,6 @@ def Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(arg):
 def Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(arg):
     global b_guarding_emergency
     b_guarding_emergency = arg
-
-def Rte_Write_GuardingStateMachineSWC_si16_Angle(arg):
-    global si16_Angle
-    si16_Angle = arg
 
 def Rte_Write_GuardingStateMachineSWC_E_play_sound(arg):
     global E_play_sound
