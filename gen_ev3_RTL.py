@@ -43,6 +43,7 @@ variables = {
 
     "b_guarding_mode": False,
     "b_guarding_emergency": False,
+    "E_play_sound": 0
 }
 
 
@@ -61,8 +62,8 @@ components = {
         ["E_State", "b_Angle_reset", "b_guarding_mode", "ui16_motor_speed"]
     ],
     "GuardingStateMachineSWC": [
-        ["b_guarding_mode", "S_face", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance", "b_Angle_reset"],
-        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed", "b_guarding_emergency"]
+        ["b_guarding_mode", "S_face", "b_Angle_reset", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance"],
+        ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed", "b_guarding_emergency", "E_play_sound"]
     ],
     "MotorSWC": [
         ["E_State", "si16_Angle", "si16_turn_angle", "ui16_motor_speed"],
@@ -74,7 +75,7 @@ components = {
     ],
     "UltrasonicSWC": [
         ["si16_Raw_distance", "b_Distance_reset", "si16_Angle"],
-        ["f_Distance", "S_Max_distance_and_angle", "f_avg_Distance"]
+        ["f_Distance", "b_Distance_reset", "S_Max_distance_and_angle", "f_avg_Distance"]
     ],
     "ColorsensorSWC": [
         ["e_Raw_color"],
@@ -82,7 +83,7 @@ components = {
     ],
     "EmergencySWC": [
         ["b_Control_bits_valid", "f_Distance", "b_guarding_emergency"],
-        ["b_Emergency_distance", "b_Emergency_timeout"]
+        ["b_Emergency_distance", "b_Emergency_timeout", "b_guarding_mode"]
     ],
     "BazookaSWC": [
         ["E_State"],
@@ -93,8 +94,8 @@ components = {
         ["ui8_Control_bits", "b_Control_bits_valid", "S_face_position"]
     ],
     "IOHandler": [
-        ["si16_Motor_speed_left", "si16_Motor_speed_right", "b_Shoot"],
-        ["si16_Raw_distance", "si16_Raw_angle", "e_Raw_color", "b_Shoot"]
+        ["si16_Motor_speed_left", "si16_Motor_speed_right", "b_Shoot", "E_play_sound"],
+        ["si16_Raw_distance", "si16_Raw_angle", "e_Raw_color", "b_Shoot", "E_play_sound"]
     ]
 }
 

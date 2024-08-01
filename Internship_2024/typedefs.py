@@ -18,3 +18,10 @@ class TURN():
     RIGHT = 0
     LEFT = 1
 
+class SoundFile():
+    NONE = 0
+    CRYING = 1
+    OBJECT = 2
+    SEARCHING = 3
+    HI = 4
+    GAMEOVER = 5
