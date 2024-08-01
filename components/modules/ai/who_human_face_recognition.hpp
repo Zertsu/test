@@ -17,10 +17,29 @@ typedef enum
 
 typedef struct
 {
-    char valid;
-    char x;
-    char eyes;
-} recognizer_position_t;
+    uint8_t valid;
+    
+        uint16_t frameW;
+        uint16_t frameH;
+
+        uint16_t boxX;
+        uint16_t boxY;
+        uint16_t boxW;
+        uint16_t boxH;
+        
+        uint16_t noseX;
+        uint16_t noseY;
+
+        uint16_t l_eyeX;
+        uint16_t l_eyeY;
+        uint16_t r_eyeX;
+        uint16_t r_eyeY;
+
+        uint16_t l_mouthX;
+        uint16_t l_mouthY;
+        uint16_t r_mouthX;
+        uint16_t r_mouthY;
+    } recognizer_position_t;
 
 void register_human_face_recognition(QueueHandle_t frame_i,
                                      QueueHandle_t event,

@@ -110,6 +110,8 @@ static void task_process_handler(void *arg)
     bool recognizedFriend = false;
     recognizer_position_t positions_result;
 
+    bool isFoe = false;
+    
     while (true)
     {
         xSemaphoreTake(xMutex, portMAX_DELAY);
@@ -120,7 +122,6 @@ static void task_process_handler(void *arg)
         if (_gEvent)
         {
             bool is_detected = false;
-            bool isFoe = false;
 
             if (xQueueReceive(xQueueFrameI, &frame, portMAX_DELAY))
             {
@@ -217,27 +218,25 @@ static void task_process_handler(void *arg)
                 }
 
                 if(recoginzedFoe || recognizedFriend) {
-                    positions_result.valid = recoginzedFoe ? 1 : 2;
-                    int divisorHorizontal = frame->width / 255;
-                    int divisorVertical = frame->width / 255;
-                    
-                    int leftEyeX = detect_results.front().keypoint[0];
-                    int leftEyeY = detect_results.front().keypoint[1];
-                    int rightEyeX = detect_results.front().keypoint[6];
-                    int rightEyeY = detect_results.front().keypoint[7];
-
-                    float eyesDistanceSquared = dl::math::power(leftEyeX - rightEyeX, 2) + dl::math::power(leftEyeY - rightEyeY, 2);
-
-                    // Copied sqrt method from "components/esp-dl/include/math/dl_math.hpp", calling it doesn't work
-                    int sqrtTemp = 0x1fbb4000 + (*(int *)&eyesDistanceSquared >> 1);
-                    float eyesDistance = *(float *)(&sqrtTemp);
-
-                    positions_result.x = detect_results.front().keypoint[4] / divisorHorizontal;
-                    positions_result.eyes = (char)(eyesDistance / divisorHorizontal); // Technically could overflow, but probably never will
+                    positions_result.valid    = recoginzedFoe ? 1 : 2;
+                    positions_result.frameW   = (uint16_t)(frame->width);
+                    positions_result.frameH   = (uint16_t)(frame->height);
+                    positions_result.boxX     = (uint16_t)(detect_results.front().box[0]);
+                    positions_result.boxY     = (uint16_t)(detect_results.front().box[1]);
+                    positions_result.boxW     = (uint16_t)((detect_results.front().box[2] - detect_results.front().box[0]));
+                    positions_result.boxH     = (uint16_t)((detect_results.front().box[3] - detect_results.front().box[1]));
+                    positions_result.noseX    = (uint16_t)(detect_results.front().keypoint[4]);
+                    positions_result.noseY    = (uint16_t)(detect_results.front().keypoint[5]);
+                    positions_result.l_eyeX   = (uint16_t)(detect_results.front().keypoint[0]);
+                    positions_result.l_eyeY   = (uint16_t)(detect_results.front().keypoint[1]);
+                    positions_result.r_eyeX   = (uint16_t)(detect_results.front().keypoint[6]);
+                    positions_result.r_eyeY   = (uint16_t)(detect_results.front().keypoint[7]);
+                    positions_result.l_mouthX = (uint16_t)(detect_results.front().keypoint[2]);
+                    positions_result.l_mouthY = (uint16_t)(detect_results.front().keypoint[3]);
+                    positions_result.r_mouthX = (uint16_t)(detect_results.front().keypoint[8]);
+                    positions_result.r_mouthY = (uint16_t)(detect_results.front().keypoint[9]);
                 } else {
-                    positions_result.valid = 0;
-                    positions_result.x = 0;
-                    positions_result.eyes = 0;
+                    memset(&positions_result, 0, sizeof(positions_result));
                 }
             }
 
@@ -257,9 +256,7 @@ static void task_process_handler(void *arg)
 
             if (xQueueResult && *guardingMode)
             {
-                
-                
-                xQueueSend(xQueueResult, &positions_result, portMAX_DELAY);
+                xQueueSend(xQueueResult, (void *)&positions_result, portMAX_DELAY);
             }
         }
     }

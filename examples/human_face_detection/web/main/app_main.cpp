@@ -53,7 +53,7 @@ extern "C" void app_main()
     
     // Create queues for the face detection
     xQueueEvent = xQueueCreate(1, sizeof(recognizer_state_t *));
-    xQueueDetResult = xQueueCreate(1, sizeof(recognizer_position_t *));
+    xQueueDetResult = xQueueCreate(1, sizeof(recognizer_position_t));
 
     // Create queues for comunication between the website and robot
     xQueueDistance = xQueueCreate(1, sizeof(float *));
@@ -224,17 +224,13 @@ static void task_udpButtonSender(void *arg)
 }
 
 static void task_udpRecognitionSender(void *arg) {
-    recognizer_position_t facePosition;
-    char buff[8];
+    char buff[1 + sizeof(recognizer_position_t)];
+    buff[0] = 4;
     while (true) {
         // Recieve face position
-        xQueueReceive(xQueueDetResult, &facePosition, portMAX_DELAY);
+        xQueueReceive(xQueueDetResult, &(buff[1]), portMAX_DELAY);
         if(readyToSend) {
-            buff[1] = facePosition.valid;
-            buff[2] = facePosition.x;
-            buff[3] = facePosition.eyes;
-            buff[0] = 4;
-            sendto(sock, buff, 4, 0, &robotAddr, sizeof(robotAddr));
+            sendto(sock, buff, sizeof(buff), 0, &robotAddr, sizeof(robotAddr));
         }
     }
 }
