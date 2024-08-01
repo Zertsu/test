@@ -12,7 +12,7 @@ class LogLevel:
 # Configuration 
 
 # Log level, logs below the given value
-LOG_LEVEL = LogLevel.WARN
+LOG_LEVEL = LogLevel.TRACE
 
 # Tags to log, list or None. If list: all tags within the list will be logged, if None: every tag will be logged
 LOG_TAGS = None
@@ -36,8 +36,11 @@ class Logger:
 
         curentTime = time.ticks_ms()
         levelString = ["FATAL","ERROR","WARN ","INFO ","DEBUG","TRACE"][level - 1]
-        print(f"[{curentTime:0>12}][{levelString}|{'##' * (7 - level)}{'  ' * (level - 1)}][{self._tag: <8}]: {message}")
-
+        print("[{:0>12}][{}|{}{}][{}]: {}".format(
+            curentTime, levelString,
+            '##' * (7 - level), '  ' * (level - 1),
+            self._tag, message
+        ))
 
     def LOGF(self, message):
         self._printMessage(LogLevel.FATAL, message)

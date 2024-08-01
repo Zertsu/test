@@ -14,6 +14,8 @@ from pybricks.parameters import Stop, Port, Direction
 
 from pybricks.media.ev3dev import SoundFile
 
+from typedefs import SoundFiles
+
 
 # Create your objects here.
 ev3 = EV3Brick()
@@ -86,29 +88,29 @@ async def IOHandler():
 
         previous_shoot = shoot
 
-        if sound == SoundFile.CRYING:
+        if sound == SoundFiles.CRYING:
             soundCrying()
-            sound = SoundFile.NONE
+            sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
-        elif sound == SoundFile.OBJECT:
+        elif sound == SoundFiles.OBJECT:
             soundObject()
-            sound = SoundFile.NONE
+            sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
-        elif sound == SoundFile.SEARCHING:
+        elif sound == SoundFiles.SEARCHING:
             soundSearching()
-            sound = SoundFile.NONE
+            sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
-        elif sound == SoundFile.HI:
+        elif sound == SoundFiles.HI:
             soundHi()
-            sound = SoundFile.NONE
+            sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
-        elif sound == SoundFile.GAMEOVER:
+        elif sound == SoundFiles.GAMEOVER:
             soundGameOver()
-            sound = SoundFile.NONE
+            sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         await asyncio.sleep_ms(async_timer)

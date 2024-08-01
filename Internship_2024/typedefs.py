@@ -18,7 +18,7 @@ class TURN():
     RIGHT = 0
     LEFT = 1
 
-class SoundFile():
+class SoundFiles():
     NONE = 0
     CRYING = 1
     OBJECT = 2

@@ -28,7 +28,7 @@ def main():
     loop.create_task(ComunicationHandler.ComunicationHandler_Send())
 
     # SWCs
-    # loop.create_task(StateMachineSWC.state_machine())
+    loop.create_task(StateMachineSWC.state_machine())
     loop.create_task(GuardingStateMachineSWC.guard_state_machine())
     loop.create_task(MotorSWC.MotorSWC())
     loop.create_task(GyroSWC.GyroSWC())

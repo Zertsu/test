@@ -73,7 +73,7 @@ def checkTranitionNeeded_Idle():
         # and prepare to get the control back
         Rte_Write_StateMachineSWC_b_guarding_mode(True)
         previousGuardingBit = True
-        lastState = States.None
+        lastState = States.NONE
         state = States.IDLE
         nextSate = state
         return True
