@@ -90,7 +90,7 @@ components = {
         ["b_Shoot"]
     ],
     "ComunicationHandler": [
-        ["f_Distance"],
+        ["f_Distance", "b_guarding_mode"],
         ["ui8_Control_bits", "b_Control_bits_valid", "S_face_position"]
     ],
     "IOHandler": [

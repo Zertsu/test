@@ -305,6 +305,10 @@ def Rte_Read_ComunicationHandler_f_Distance():
     global f_Distance
     return f_Distance
 
+def Rte_Read_ComunicationHandler_b_guarding_mode():
+    global b_guarding_mode
+    return b_guarding_mode
+
 def Rte_Write_ComunicationHandler_ui8_Control_bits(arg):
     global ui8_Control_bits
     ui8_Control_bits = arg
