@@ -22,6 +22,7 @@ global E_State
 global b_Shoot
 global b_guarding_mode
 global b_guarding_emergency
+global E_play_sound
 
 ui8_Control_bits = 0
 b_Control_bits_valid = False
@@ -45,8 +46,9 @@ b_Emergency_distance = False
 b_Emergency_timeout = False
 E_State = None
 b_Shoot = False
-b_guarding_mode = True
+b_guarding_mode = False
 b_guarding_emergency = False
+E_play_sound = 0
 
 
 
@@ -130,10 +132,6 @@ def Rte_Read_GuardingStateMachineSWC_f_Distance():
     global f_Distance
     return f_Distance
 
-def Rte_Read_GuardingStateMachineSWC_b_Angle_reset():
-    global b_Angle_reset
-    return b_Angle_reset
-
 def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
@@ -141,10 +139,6 @@ def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
 def Rte_Write_GuardingStateMachineSWC_E_State(arg):
     global E_State
     E_State = arg
-
-def Rte_Write_GuardingStateMachineSWC_b_Angle_reset(arg):
-    global b_Angle_reset
-    b_Angle_reset = arg
 
 def Rte_Write_GuardingStateMachineSWC_b_Angle_reset(arg):
     global b_Angle_reset
@@ -165,6 +159,10 @@ def Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(arg):
 def Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(arg):
     global b_guarding_emergency
     b_guarding_emergency = arg
+
+def Rte_Write_GuardingStateMachineSWC_E_play_sound(arg):
+    global E_play_sound
+    E_play_sound = arg
 
 
 
@@ -281,6 +279,10 @@ def Rte_Write_EmergencySWC_b_Emergency_timeout(arg):
     global b_Emergency_timeout
     b_Emergency_timeout = arg
 
+def Rte_Write_EmergencySWC_b_guarding_mode(arg):
+    global b_guarding_mode
+    b_guarding_mode = arg
+
 
 
 # BazookaSWC
@@ -326,6 +328,10 @@ def Rte_Read_IOHandler_b_Shoot():
     global b_Shoot
     return b_Shoot
 
+def Rte_Read_IOHandler_E_play_sound():
+    global E_play_sound
+    return E_play_sound
+
 def Rte_Write_IOHandler_si16_Raw_distance(arg):
     global si16_Raw_distance
     si16_Raw_distance = arg
@@ -341,3 +347,7 @@ def Rte_Write_IOHandler_e_Raw_color(arg):
 def Rte_Write_IOHandler_b_Shoot(arg):
     global b_Shoot
     b_Shoot = arg
+
+def Rte_Write_IOHandler_E_play_sound(arg):
+    global E_play_sound
+    E_play_sound = arg
