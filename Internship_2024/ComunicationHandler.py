@@ -106,7 +106,7 @@ async def ComunicationHandler_Send():
             guardingState = Rte_Read_ComunicationHandler_b_guarding_mode()
             if guardingState != lastGuardingState or timeSinceLastStateReport >= STATE_SEND_PERIOD:
                 # Send out guarding mode state change
-                packetData = struct.pack("!Bb", PackeyType.STATE, guardingState)
+                packetData = struct.pack("!Bb", PacketType.STATE, guardingState)
                 udpSocket.sendto(packetData, lastPacketSender)
                 timeSinceLastStateReport = 0
             else:
