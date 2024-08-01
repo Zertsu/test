@@ -13,6 +13,10 @@ state = States.IDLE
 nextState = States.IDLE
 
 
+# Configuration
+RUN_PERIOD = 50 # [ms] Run period of the state machine
+
+
 # Definition of the control bits
 class ControlBits():
     FORWARD = 1 << 0
@@ -27,9 +31,14 @@ class ControlBits():
 def check_first_entry():
     return state != lastState
 
+
+previousGuardingBit = False
 # Checks for transitions from IDLE, considering the control and emergency bits
 def checkTranitionNeeded_Idle():
+    global lastState
+    global state
     global nextState
+    global previousGuardingBit
     # In case of comunication timeout, don't change out of IDLE
     timeoutEmergency = Rte_Read_StateMachineSWC_b_Emergency_timeout()
     if timeoutEmergency:
@@ -58,6 +67,15 @@ def checkTranitionNeeded_Idle():
         return True
     if controlBits & ControlBits.SHOOT:
         nextState = States.SHOOT
+        return True
+    if controlBits & ControlBits.GUARDING:
+        # In case of guarding mode, enable the GuardingStateMachine,
+        # and prepare to get the control back
+        Rte_Write_StateMachineSWC_b_guarding_mode(True)
+        previousGuardingBit = True
+        lastState = States.None
+        state = States.IDLE
+        nextSate = state
         return True
     return False
 
@@ -101,44 +119,69 @@ def checkTranitionNeeded_Mooving(mask):
         return True
     return False
 
+
+def guardingModeHandler():
+    # In guarding mode hand over control to the GuardingStateMachine
+    # and only check for emergencies and for manual disabling
+    global previousGuardingBit
+
+    timeoutEmergency = Rte_Read_StateMachineSWC_b_Emergency_timeout()
+    distanceEmergency = Rte_Read_StateMachineSWC_b_Emergency_distance()
+    if timeoutEmergency or distanceEmergency:
+        guardingMode = False
+        Rte_Write_StateMachineSWC_b_guarding_mode(guardingMode)
+    
+    controlBits = Rte_Read_StateMachineSWC_ui8_Control_bits()
+    guardingBit = bool(controlBits & ControlBits.GUARDING)
+    if guardingBit and not previousGuardingBit:
+        # User disabled guarding mode
+        guardingMode = False
+        Rte_Write_StateMachineSWC_b_guarding_mode(guardingMode)
+    previousGuardingBit = guardingBit
+    
+
 async def state_machine():
     global state
     global lastState
     global nextState
     nextState = state
     while True:
-        if state == States.IDLE:
-            if(check_first_entry() == True):
-                pass # Do nothing
-            else:
-                if(checkTranitionNeeded_Idle() == True):
+        guardingState = Rte_Read_StateMachineSWC_b_guarding_mode()
+        if not guardingState:
+            if state == States.IDLE:
+                if(check_first_entry() == True):
                     pass # Do nothing
-                else :
+                else:
+                    if(checkTranitionNeeded_Idle() == True):
+                        pass # Do nothing
+                    else :
+                        pass # Do nothing
+            
+            elif state == States.GO_FORWARD:
+                checkTranitionNeeded_Mooving(ControlBits.FORWARD)
+            elif state == States.GO_BACKWARD:
+                checkTranitionNeeded_Mooving(ControlBits.BACKWARD)
+            elif state == States.TURN_LEFT:
+                if(check_first_entry() == True):
+                    Rte_Write_StateMachineSWC_b_Angle_reset(False)
+                checkTranitionNeeded_Mooving(ControlBits.LEFT)
+            elif state == States.TURN_RIGHT:
+                if(check_first_entry() == True):
+                    Rte_Write_StateMachineSWC_b_Angle_reset(False)
+                checkTranitionNeeded_Mooving(ControlBits.RIGHT)
+            elif state == States.SHOOT:
+                if(check_first_entry() == True):
                     pass # Do nothing
-        
-        elif state == States.GO_FORWARD:
-            checkTranitionNeeded_Mooving(ControlBits.FORWARD)
-        elif state == States.GO_BACKWARD:
-            checkTranitionNeeded_Mooving(ControlBits.BACKWARD)
-        elif state == States.TURN_LEFT:
-            if(check_first_entry() == True):
-                Rte_Write_StateMachineSWC_b_Angle_reset(False)
-            checkTranitionNeeded_Mooving(ControlBits.LEFT)
-        elif state == States.TURN_RIGHT:
-            if(check_first_entry() == True):
-                Rte_Write_StateMachineSWC_b_Angle_reset(False)
-            checkTranitionNeeded_Mooving(ControlBits.RIGHT)
-        elif state == States.SHOOT:
-            if(check_first_entry() == True):
-                pass # Do nothing
-            else:
-                if(checkTranitionNeeded_Shoot() == True):
-                    pass # Do nothing
-                else :
-                    pass # Do nothing
+                else:
+                    if(checkTranitionNeeded_Shoot() == True):
+                        pass # Do nothing
+                    else :
+                        pass # Do nothing
 
-        lastState = state
-        state = nextState
+            lastState = state
+            state = nextState
 
-        Rte_Write_StateMachineSWC_E_State(state)
-        await asyncio.sleep_ms(50)  # Adjust sleep time as needed
+            Rte_Write_StateMachineSWC_E_State(state)
+        else:
+            guardingModeHandler()
+        await asyncio.sleep_ms(RUN_PERIOD)
