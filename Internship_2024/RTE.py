@@ -283,6 +283,10 @@ def Rte_Write_EmergencySWC_b_Emergency_timeout(arg):
     global b_Emergency_timeout
     b_Emergency_timeout = arg
 
+def Rte_Write_EmergencySWC_b_guarding_emergency(arg):
+    global b_guarding_emergency
+    b_guarding_emergency = arg
+
 def Rte_Write_EmergencySWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
