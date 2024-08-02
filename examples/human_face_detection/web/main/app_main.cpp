@@ -63,7 +63,7 @@ extern "C" void app_main()
     register_camera(PIXFORMAT_RGB565, FRAMESIZE_QVGA, 2, xQueueAIFrame);
     app_mdns_main();
     register_human_face_recognition(xQueueAIFrame, xQueueEvent, xQueueDetResult, xQueueHttpFrame, false, &guardingMode);
-    register_httpd(xQueueHttpFrame, NULL, true, xQueueButtons, xQueueDistance);
+    register_httpd(xQueueHttpFrame, NULL, true, xQueueButtons, xQueueDistance, &guardingMode);
 
     xTaskCreate(task_udpReciver, TAG, 4 * 1024, NULL, 5, NULL);
     xTaskCreate(task_udpButtonSender, TAG, 4 * 1024, NULL, 5, NULL);
@@ -73,6 +73,7 @@ extern "C" void app_main()
 
 static int processPacket(char *packet, int packetLen, char* response, int responseSize)
 {
+    bool recievedGuardingMode = 0;
     switch (packet[0]) {
         case 0:
             // Ping packet, send a response
@@ -88,6 +89,13 @@ static int processPacket(char *packet, int packetLen, char* response, int respon
             // Distance packet, foward it to the web server
             xQueueSend(xQueueDistance, &(packet[1]), sizeof(float));
             return 0;
+        case 5:
+            recievedGuardingMode = !!packet[1];
+            if(recievedGuardingMode != guardingMode) {
+                ESP_LOGI(TAG, "%s guarding mode", recievedGuardingMode ? "Enableing" : "Disableing");
+                guardingMode = recievedGuardingMode;
+            }
+            return 0;
         default:
             return 0;
     }
@@ -97,10 +105,8 @@ static int processPacket(char *packet, int packetLen, char* response, int respon
 static void processCameraButtons(int buttons) {
     recognizer_state_t requestedState = DETECT;
     if(buttons & 1 << 6) {
-        guardingMode = !guardingMode;
-        ESP_LOGI(TAG, "Goarding mode is now %s", guardingMode ? "On" : "Off");
+        ESP_LOGI(TAG, "Goarding mode button pressed");
     }
-
     if(buttons & 1 << 8) {
         ESP_LOGI(TAG, "Learn Foe");
         requestedState = ENROLL_FOE;

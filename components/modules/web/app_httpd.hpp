@@ -5,4 +5,4 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 
-void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb, const QueueHandle_t my_buttonsQ, const QueueHandle_t my_distanceQ);
+void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb, const QueueHandle_t my_buttonsQ, const QueueHandle_t my_distanceQ, bool *guardingModePointer);

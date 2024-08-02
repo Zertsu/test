@@ -49,6 +49,9 @@ static int8_t detection_enabled = 0;
 static int8_t recognition_enabled = 0;
 static int8_t is_enrolling = 0;
 
+static bool *isGuardingMode = NULL;
+
+
 typedef struct
 {
     httpd_req_t *req;
@@ -700,7 +703,7 @@ static esp_err_t my_buttons_handler(httpd_req_t *req)
     }
 
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    return httpd_resp_send(req, "K", 1);
+    return httpd_resp_send(req, *isGuardingMode ? "G" : "N", 1);
 }
 
 
@@ -725,7 +728,7 @@ static void task_distanceHandler(void *arg)
 }
 
 
-void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb, const QueueHandle_t my_buttonsQ, const QueueHandle_t my_distanceQ)
+void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, const bool return_fb, const QueueHandle_t my_buttonsQ, const QueueHandle_t my_distanceQ, bool *guardingModePointer)
 {
     xQueueFrameI = frame_i;
     xQueueFrameO = frame_o;
@@ -734,6 +737,8 @@ void register_httpd(const QueueHandle_t frame_i, const QueueHandle_t frame_o, co
     x_my_buttonsQ = my_buttonsQ;
     x_my_distanceQ = my_distanceQ;
 
+    isGuardingMode = guardingModePointer;
+    
     my_xMutex = xSemaphoreCreateMutex();
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
