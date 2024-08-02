@@ -385,11 +385,11 @@
               grid-template-columns: repeat(3, 1fr);
               grid-template-rows: repeat(5, 1fr);
               grid-template-areas: 
-                "my_shoot          .           my_guarding"
-                "my_distance_label my_distance ."
-                ".                 my_forward  ."
-                "my_left           .           my_right"
-                ".                 my_backward . ";
+                "my_shoot          .             my_guarding"
+                "my_distance_label my_distance   ."
+                ".                 my_forward    ."
+                "my_left           my_guardingON my_right"
+                ".                 my_backward   . ";
             }
 
             #my_forward {grid-area: my_forward;}
@@ -400,7 +400,10 @@
             #my_guarding {grid-area: my_guarding;}
             #my_distance {grid-area: my_distance;}
             #my_distance_label {grid-area: my_distance_label;}
-
+            #my_guardingON {
+              grid-area: my_guardingON;
+              text-align: center;
+            }
 
             #my_cam_controls {
               display: grid;
@@ -764,6 +767,7 @@
                   <button id="my_shoot">Shoot</button>
                   <button id="my_guarding">Guarding mode</button>
                   <span id="my_distance_label">Distance: </span><span id="my_distance"></span>
+                  <span id="my_guardingON" class="hidden">GUARING<br>MODE</span>
                 </div>
             </div>
         </section>
@@ -1241,10 +1245,17 @@ document.addEventListener('DOMContentLoaded', function (event) {
     domElement.addEventListener("touchcancel", onLeaveEvent)
   }
 
+  const guarindElement = document.getElementById("my_guardingON")
   function sendButtons() {
     clearTimeout(buttons.timeoutId)
     fetch("/buttons?buttons=" + buttons.status).then(function (response) {
+      return response.text()
     }).then(function (data) {
+      if (data == "G") {
+        show(guarindElement)
+      } else {
+        hide(guarindElement)
+      }
     }).catch(function (err) {
       console.log('Fetch Error :-S', err);
     });
