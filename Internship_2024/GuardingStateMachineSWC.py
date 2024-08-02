@@ -117,6 +117,7 @@ max_eye_margin = 40 # maximum distance between the eyes
 # end of global variables
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# this Function is controlling the obsticle avoidance
 def obstycle():
 
     # global variabals
@@ -295,6 +296,7 @@ def obstycle():
         entry_number = no_obstycle
         stay = True
 
+# this function is making the shooting
 def shooting():
 
     # global variabals
@@ -327,7 +329,8 @@ def shooting():
         guard_state = GuardStates.SEARCH
         log.LOGI(guard_state)
         search_flag = SearchFlag.reset
-        
+
+# this function centers the face and closes the gap to 50 cm 
 def attacking():
 
     # global variabals
@@ -342,6 +345,9 @@ def attacking():
     global idle_time
     global max_idle_time
 
+    # local variables 
+    enemy = 1
+
     # getting data from RTE to a global variable
     face_position = Rte_Read_GuardingStateMachineSWC_S_face()
 
@@ -349,7 +355,7 @@ def attacking():
     if face_position[1] > left_face_margin and face_position[1] < right_face_margin:
 
         # checking if we are close enough to shoot
-        if face_position[2] < max_eye_margin:
+        if face_position[2] < max_eye_margin and face_position[0] == enemy:
             state = States.GO_FORWARD
             Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_slow)
             Rte_Write_GuardingStateMachineSWC_E_State(state)
@@ -381,7 +387,8 @@ def attacking():
         Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_slow)
         Rte_Write_GuardingStateMachineSWC_E_State(state)
         idle_time = 0
-        
+
+# this function is searching for face     
 def searching():
 
     # global variabals
@@ -434,8 +441,7 @@ def searching():
             log.LOGI(guard_state)
             search_flag = SearchFlag.reset
             
-
-        
+# this function checks if we are in guarding mode and also calls the other function in every state      
 async def guard_state_machine():
 
     # global variabals
