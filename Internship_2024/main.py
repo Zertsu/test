@@ -13,6 +13,7 @@ import UltrasonicSWC
 import ColorsensorSWC
 import EmergencySWC
 import BazookaSWC
+import FaceProcessorSWC
 
 # Handlers
 import ComunicationHandler
@@ -36,6 +37,7 @@ def main():
     loop.create_task(ColorsensorSWC.ColorsensorSWC())
     loop.create_task(EmergencySWC.EmergencySWC())
     loop.create_task(BazookaSWC.BazookaSWC())
+    loop.create_task(FaceProcessorSWC.FaceProcessorSWC())
     
     
     loop.run_forever()

@@ -31,10 +31,12 @@ async def EmergencySWC():
         if distance < distance_emergency:  
             emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_distance(emergency_bit)
+            print("we close")
         
         if connectionTimedOut:      
             emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
+            print("Huston we have a problem")
 
         if emergency_bit and distance > distance_emergency and not connectionTimedOut:
             emergency_bit = False      
@@ -45,6 +47,7 @@ async def EmergencySWC():
             guarding_emergency = False
             Rte_Write_EmergencySWC_b_guarding_mode(False)
             Rte_Write_EmergencySWC_b_guarding_emergency(guarding_emergency)
+            print("we are done with  you")
 
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed

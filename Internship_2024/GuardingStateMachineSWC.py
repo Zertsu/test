@@ -157,7 +157,7 @@ def obstycle():
     distance = Rte_Read_GuardingStateMachineSWC_f_Distance()
 
     # checking in what state we are and doing things accordingly
-    if distance < emergency_distance and entry_number == no_obstycle:
+    if ( distance < emergency_distance or in_box_flag == maybe_in_box ) and entry_number == no_obstycle :
 
         guard_state = GuardStates.OBSTYCLE
         log.LOGI(guard_state)
@@ -267,7 +267,11 @@ def obstycle():
         # getting data from RTE to a local variable
         angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
         if angle == 0:
-            if distance < emergency_distance and entry_number == turning_correctly:
+            if in_box_flag == maybe_in_box:
+                entry_number = no_obstycle
+                run_time = 0
+                stay = True
+            elif distance < emergency_distance and entry_number == turning_correctly:
                 entry_number = no_obstycle
                 Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFiles.OBJECT)
                 run_time = 0
@@ -291,7 +295,6 @@ def obstycle():
         entry_number = no_obstycle
         stay = True
     else: 
-        guard_state = GuardStates.SEARCH
         run_time = 0
         entry_number = no_obstycle
         stay = True
@@ -310,13 +313,10 @@ def shooting():
 
     # checking what we need to do with the face we see
     if face_position[0] == enemy:
-        # say something
         state = States.SHOOT
         Rte_Write_GuardingStateMachineSWC_E_State(state)
         Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFiles.GAMEOVER)
         Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
-        state = States.IDLE
-        Rte_Write_GuardingStateMachineSWC_E_State(state)
         guard_state = GuardStates.SEARCH
         log.LOGI(guard_state)
         search_flag = SearchFlag.reset
@@ -403,7 +403,7 @@ def searching():
     
     # getting data from RTE to a global variable
     face_position = Rte_Read_GuardingStateMachineSWC_S_face()
-
+    #print(face_position)
     # checking if we see a face
     if face_position[0] == no_face:
         # turning opposite to the last turn
