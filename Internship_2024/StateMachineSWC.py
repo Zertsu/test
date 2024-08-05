@@ -39,45 +39,52 @@ def checkTranitionNeeded_Idle():
     global state
     global nextState
     global previousGuardingBit
-    # In case of comunication timeout, don't change out of IDLE
-    timeoutEmergency = Rte_Read_StateMachineSWC_b_Emergency_timeout()
-    if timeoutEmergency:
-        return False
-    
-    # If we're not in timout we can go backwards
+
+    # Variable tracking if we need to transittion
+    transittionNeeded = False
+
+    # Read relevant variables from the RTE
     controlBits = Rte_Read_StateMachineSWC_ui8_Control_bits()
-    if controlBits & ControlBits.BACKWARD:
-        nextState = States.GO_BACKWARD
-        return True
-
-    # To do anything else we have to not be in a distance emergency
+    timeoutEmergency = Rte_Read_StateMachineSWC_b_Emergency_timeout()
     distanceEmergency = Rte_Read_StateMachineSWC_b_Emergency_distance()
-    if distanceEmergency:
-        return False
+    guardingBit = bool(controlBits & ControlBits.GUARDING)
 
+    # In case of comunication timeout, don't change out of IDLE
+    if timeoutEmergency:
+        pass
+
+    # If we're not in timeout we can go backwards
+    elif controlBits & ControlBits.BACKWARD:
+        nextState = States.GO_BACKWARD
+        transittionNeeded = True
+    
+    # To do anything else we have to not be in a distance emergency
+    elif distanceEmergency:
+        pass
+    
     # Change state acording to the control bits
-    if controlBits & ControlBits.FORWARD:
+    elif controlBits & ControlBits.FORWARD:
         nextState = States.GO_FORWARD
-        return True
-    if controlBits & ControlBits.LEFT:
+        transittionNeeded = True
+    elif controlBits & ControlBits.LEFT:
         nextState = States.TURN_LEFT
-        return True
-    if controlBits & ControlBits.RIGHT:
+        transittionNeeded = True
+    elif controlBits & ControlBits.RIGHT:
         nextState = States.TURN_RIGHT
-        return True
-    if controlBits & ControlBits.SHOOT:
+        transittionNeeded = True
+    elif controlBits & ControlBits.SHOOT:
         nextState = States.SHOOT
-        return True
-    if controlBits & ControlBits.GUARDING:
+        transittionNeeded = True
+    elif not previousGuardingBit and guardingBit:
         # In case of guarding mode, enable the GuardingStateMachine,
         # and prepare to get the control back
         Rte_Write_StateMachineSWC_b_guarding_mode(True)
-        previousGuardingBit = True
         lastState = States.NONE
         state = States.IDLE
-        nextSate = state
-        return True
-    return False
+        nextState = state
+        transittionNeeded = True
+    previousGuardingBit = guardingBit
+    return transittionNeeded
 
  
 # Checks transition out of SHOOT state, by looking for a fall transition on the Shoot bit
