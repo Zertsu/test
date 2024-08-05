@@ -8,6 +8,10 @@ import uasyncio as asyncio
 import socket
 import struct
 
+# Logger
+import Logger
+log = Logger.Logger("Communication Handler")
+
 # Configuration
 BIND_ADDRESS = ("0.0.0.0", 15002) # Listening address for UDP socket
 RECIEVE_RUN_PERIOD = 20 # [ms] Run period of the reciver component
@@ -20,6 +24,7 @@ STATE_SEND_PERIOD = 1000 # [ms] Send period of the state packet
 # Global Variables
 lastPacketSender = ("0.0.0.0", 0)
 udpSocket = None
+isTimedOut = True
 
 # Packet type definitions
 class PacketType():
@@ -35,11 +40,14 @@ async def ComunicationHandler_Recieve():
     global RECIEVE_RUN_PERIOD
     global lastPacketSender
     global udpSocket
+    global isTimedOut
 
+    log.LOGI("Starting Reciever")
     # Setup UDP socket
     udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udpSocket.setblocking(False)
     udpSocket.bind(BIND_ADDRESS)
+    log.LOGI("Created and bound socket to {}".format(BIND_ADDRESS))
 
     # Initialize local variables
     timeSinceLastPacket = 0
@@ -47,19 +55,26 @@ async def ComunicationHandler_Recieve():
     while True:
         try:
             packet, recvAddress = udpSocket.recvfrom(64)
-            # print(packet)
             if packet:
+                log.LOGD("Recieved packet from {}: {}".format(socket.inet_ntop(socket.AF_INET, recvAddress[4:]), packet))
+                if isTimedOut:
+                    log.LOGI("Timeout cleard")
                 timeSinceLastPacket = 0
+                isTimedOut = False
                 lastPacketSender = recvAddress
                 response = handlePacket(packet)
                 if not response == None:
+                    log.LOGD("Sending response to {}: {}".format(socket.inet_ntop(socket.AF_INET, recvAddress[4:]), response))
                     udpSocket.sendto(response, recvAddress)
         except OSError as e:
             timeSinceLastPacket = timeSinceLastPacket + RECIEVE_RUN_PERIOD
-        
-        isTimedOut = timeSinceLastPacket > TIMEOUT_THRESHOLD
+         
+        if not isTimedOut and timeSinceLastPacket > TIMEOUT_THRESHOLD:
+            log.LOGW("Connection timed out")
+            isTimedOut = True
         Rte_Write_ComunicationHandler_b_Control_bits_valid(isTimedOut)
         await asyncio.sleep_ms(RECIEVE_RUN_PERIOD)
+    log.LOGF("Reciever exited loop")
 
 
 def handlePacket(packet):
@@ -84,6 +99,9 @@ def handlePacket(packet):
 async def ComunicationHandler_Send():
     global SEND_RUN_PERIOD
     global udpSocket
+    global isTimedOut
+
+    log.LOGI("Starting sender")
 
     # Local variables
     lastGuardingState = Rte_Read_ComunicationHandler_b_guarding_mode()
@@ -92,7 +110,7 @@ async def ComunicationHandler_Send():
 
     while True:
         # Only send packets if we have somewhere to send them to
-        if lastPacketSender[0] != "0.0.0.0":
+        if not isTimedOut:
             if timeSinceLastDistanceReport >= DISTANCE_SEND_PERIOD:    
                 # Send out distance measurement
                 distance = Rte_Read_ComunicationHandler_f_Distance()
@@ -114,4 +132,4 @@ async def ComunicationHandler_Send():
 
         
         await asyncio.sleep_ms(SEND_RUN_PERIOD)
-        
+    log.LOGF("Sender exited loop")

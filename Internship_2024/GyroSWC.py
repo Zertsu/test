@@ -7,6 +7,11 @@ from RTE import Rte_Read_GyroSWC_si16_Raw_angle, Rte_Read_GyroSWC_b_Angle_reset,
 
 import uasyncio as asyncio
 
+# Logger
+import Logger
+log = Logger.Logger("Gyro SWC")
+
+
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
@@ -14,12 +19,15 @@ async_timer = 50 # this variable stores the time in ms that we use in asyncio.sl
 async def GyroSWC():
     global async_timer
     reset_angle = 0 #The angle we do the reset with
+
+    log.LOGI("Starting Gyro SWC")
     while True: 
 
         gyro_sensor_value = Rte_Read_GyroSWC_si16_Raw_angle()   # this gets the gyro senzors raw value   
         angle_reset_bit = Rte_Read_GyroSWC_b_Angle_reset()  #this gets the information if we need to reset the angel
     
         if angle_reset_bit:  #The bit that we get from RTE telling us we need to reset
+            log.LOGI("Reset gyroscope")
             Rte_Write_GyroSWC_b_Angle_reset(False)    #Once we're done, we set it back to 0
             reset_angle = gyro_sensor_value  #The "new 0" becomes the current angle from gyro
         
@@ -30,3 +38,4 @@ async def GyroSWC():
 
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
+    log.LOGF("Exited loop")

@@ -450,6 +450,8 @@ async def guard_state_machine():
     global guard_state
     global search_flag 
     await asyncio.sleep_ms(first_sleep)  # Adjust sleep time later if needed
+
+    log.LOGI("Starting Gaurding State Machine")
     while True: 
 
         # getting data from RTE to a local variable
@@ -474,3 +476,4 @@ async def guard_state_machine():
             obstycle()
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
+    log.LOGF("Exited loop")

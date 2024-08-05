@@ -8,6 +8,8 @@ class States():
     SHOOT = 6
     TURN_ANGLE = 7
 
+States_STR = ["NONE", "IDLE", "GO_FORWARD", "GO_BACKWARD", "TURN_LEFT", "TURN_RIGHT", "SHOOT", "TURN_ANGLE"]
+
 class GuardStates():
     SEARCH = 0
     OBSTYCLE = 1

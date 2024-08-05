@@ -17,8 +17,15 @@ distance_emergency = 10  # this variable stores the distance in cm that is the e
 global guarding_emergency
 guarding_emergency = False # This variable checks the guarding emergency
 
+
+# Logger
+import Logger
+log = Logger.Logger("Emergency SWC")
+
 async def EmergencySWC():
     global async_timer
+
+    log.LOGI("Starting emergency SWC")
     while True: 
         connectionTimedOut = Rte_Read_EmergencySWC_b_Control_bits_valid() # tells us when the connection is timed out
         distance = Rte_Read_EmergencySWC_f_Distance() # gets the distance from the ultrasonic senzor
@@ -48,3 +55,4 @@ async def EmergencySWC():
 
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
+    log.LOGF("Exited loop")
