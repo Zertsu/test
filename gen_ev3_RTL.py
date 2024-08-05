@@ -62,7 +62,7 @@ components = {
         ["E_State", "b_Angle_reset", "b_guarding_mode", "ui16_motor_speed"]
     ],
     "GuardingStateMachineSWC": [
-        ["b_guarding_mode", "S_face", "b_Angle_reset", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance", "si16_Angle"],
+        ["b_guarding_mode", "S_face", "b_Angle_reset", "S_Max_distance_and_angle", "f_avg_Distance", "si16_turn_angle", "f_Distance", "si16_Angle", "b_Shoot"],
         ["b_guarding_mode", "E_State", "b_Angle_reset", "b_Distance_reset", "si16_turn_angle", "ui16_motor_speed", "b_guarding_emergency", "E_play_sound"]
     ],
     "MotorSWC": [

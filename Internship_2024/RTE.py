@@ -136,6 +136,10 @@ def Rte_Read_GuardingStateMachineSWC_si16_Angle():
     global si16_Angle
     return si16_Angle
 
+def Rte_Read_GuardingStateMachineSWC_b_Shoot():
+    global b_Shoot
+    return b_Shoot
+
 def Rte_Write_GuardingStateMachineSWC_b_guarding_mode(arg):
     global b_guarding_mode
     b_guarding_mode = arg
