@@ -367,4 +367,3 @@ def Rte_Write_IOHandler_b_Shoot(arg):
 def Rte_Write_IOHandler_E_play_sound(arg):
     global E_play_sound
     E_play_sound = arg
-

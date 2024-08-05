@@ -36,7 +36,7 @@ async def EmergencySWC():
         if connectionTimedOut:      
             emergency_bit = True
             Rte_Write_EmergencySWC_b_Emergency_timeout(emergency_bit)
-            print("Huston we have a problem")
+            print("Houston we have a problem")
 
         if emergency_bit and distance > distance_emergency and not connectionTimedOut:
             emergency_bit = False      
