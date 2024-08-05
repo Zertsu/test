@@ -16,6 +16,8 @@ class GuardStates():
     SHOOTING = 2
     ATTACKING = 3
 
+GuardStates_STR = ["SEARCH", "OBSTYCLE", "SHOOTING", "ATTACKING"]
+
 class TURN():
     RIGHT = 0
     LEFT = 1
