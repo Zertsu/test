@@ -7,8 +7,13 @@ import uasyncio as asyncio
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
+# Logger
+import Logger
+log = Logger.Logger("Face Processor SWC")
+
 async def FaceProcessorSWC():
 
+    log.LOGI("Starting Face Processor")
     while True:
         face_position = Rte_Read_FaceProcessorSWC_S_face_position()   # the face position struct
         
@@ -50,3 +55,4 @@ async def FaceProcessorSWC():
 
 
         await asyncio.sleep_ms(async_timer)
+    log.LOGF("Exited loop")

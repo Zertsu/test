@@ -19,8 +19,12 @@ import FaceProcessorSWC
 import ComunicationHandler
 import IOHandler
 
+# Logger
+import Logger
+log = Logger.Logger("main")
 
 def main():
+    log.LOGI("Creating tasks")
     loop = asyncio.get_event_loop()
     
     # Handler tasks
@@ -39,8 +43,10 @@ def main():
     loop.create_task(BazookaSWC.BazookaSWC())
     loop.create_task(FaceProcessorSWC.FaceProcessorSWC())
     
-    
+    log.LOGI("Starting main loop")
     loop.run_forever()
+    log.LOGF("Main loop returned")
 
 # Run the event loop
-main()
+if __name__ == "__main__":
+    main()

@@ -9,6 +9,10 @@ from RTE import Rte_Read_ColorsensorSWC_e_Raw_color, Rte_Write_ColorsensorSWC_e_
 from pybricks.parameters import Color
 import uasyncio as asyncio
 
+# Logger
+import Logger
+log = Logger.Logger("Color Sensor SWC")
+
 
 # Configuration
 RUN_PERIOD = 50 # [ms] Run period of the component
@@ -37,6 +41,7 @@ async def ColorsensorSWC():
         None : BUFFER_SIZE
     }
     
+    log.LOGI("Starting ColorsensorSWC")
     while True:
         # Remove the oldest color from the buffer
         removedColor = color_buffer.pop(OLDEST_ELEMENT)
@@ -53,3 +58,4 @@ async def ColorsensorSWC():
 
 
         await asyncio.sleep_ms(RUN_PERIOD)
+    log.LOGF("Exited loop")

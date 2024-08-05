@@ -32,6 +32,11 @@ COLOR_SENSOR_PORT = Port.S1
 global async_timer
 async_timer = 20 # this variable stores the time in ms that we use in asyncio.sleep
 
+# Logger
+import Logger
+log = Logger.Logger("IO Handler")
+
+
 async def IOHandler():
     # Initialize motors, ultrasonic sensor, color sensor, and gyro sensor
 
@@ -47,6 +52,7 @@ async def IOHandler():
     shoot_state = False  # stores the shoots state
 
 
+    log.LOGI("Starting IO Handler")
     global async_timer
     while True: 
 
@@ -58,6 +64,7 @@ async def IOHandler():
 
         # telling the bazooka to shoot
         if shoot and previous_shoot == False:
+            log.LOGI("Started shoot motor")
             bazooka.reset_angle(0)
             bazooka.run_angle(1000, 1080, then=Stop.HOLD, wait=False)
             shoot_state = True
@@ -65,6 +72,7 @@ async def IOHandler():
 
         # checking if the shoot was completed
         if shoot_state and bazooka.angle()<1082 and bazooka.angle()>1078:
+            log.LOGI("Shoot complete")
             shoot_state = False
             shoot = False
             Rte_Write_IOHandler_b_Shoot(shoot)
@@ -89,31 +97,37 @@ async def IOHandler():
         previous_shoot = shoot
 
         if sound == SoundFiles.CRYING:
+            log.LOGI("Playing sound CRYING")
             soundCrying()
             sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         elif sound == SoundFiles.OBJECT:
+            log.LOGI("Playing sound OBJECT")
             soundObject()
             sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         elif sound == SoundFiles.SEARCHING:
+            log.LOGI("Playing sound SEARCHING")
             soundSearching()
             sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         elif sound == SoundFiles.HI:
+            log.LOGI("Playing sound HI")
             soundHi()
             sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         elif sound == SoundFiles.GAMEOVER:
+            log.LOGI("Playing sound GAMEOVER")
             soundGameOver()
             sound = SoundFiles.NONE
             Rte_Write_IOHandler_E_play_sound(sound)
 
         await asyncio.sleep_ms(async_timer)
+    log.LOGF("Exited loop")
 
 
 # various sounds to be called by state machine

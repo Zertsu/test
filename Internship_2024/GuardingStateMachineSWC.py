@@ -10,7 +10,7 @@ from RTE import Rte_Read_GuardingStateMachineSWC_b_guarding_mode, Rte_Read_Guard
 import Logger
 import uasyncio as asyncio
 from typedefs import States
-from typedefs import GuardStates
+from typedefs import GuardStates, GuardStates_STR
 from typedefs import TURN
 from typedefs import SoundFiles
 
@@ -163,7 +163,7 @@ def obstycle():
     if distance < emergency_distance and entry_number == no_obstycle:
 
         guard_state = GuardStates.OBSTYCLE
-        log.LOGI(guard_state)
+        log.LOGI(GuardStates_STR[guard_state])
         entry_number = first_turn
         state = States.IDLE
         Rte_Write_GuardingStateMachineSWC_E_State(state)
@@ -259,7 +259,7 @@ def obstycle():
                     Rte_Write_GuardingStateMachineSWC_E_State(state)
                     Rte_Write_GuardingStateMachineSWC_b_guarding_emergency(True)
                     guard_state = GuardStates.SEARCH
-                    log.LOGI(guard_state)
+                    log.LOGI(GuardStates_STR[guard_state])
                     search_flag = SearchFlag.reset
                     in_box_flag = not_in_box
                     Rte_Write_GuardingStateMachineSWC_E_play_sound(SoundFiles.CRYING)
@@ -288,7 +288,7 @@ def obstycle():
 
     elif entry_number == moovement_done and guard_state == GuardStates.OBSTYCLE:
         guard_state = GuardStates.SEARCH
-        log.LOGI(guard_state)
+        log.LOGI(GuardStates_STR[guard_state])
         search_flag = SearchFlag.reset
         run_time = 0
         entry_number = no_obstycle
@@ -325,7 +325,7 @@ def shooting():
             state = States.IDLE
             Rte_Write_GuardingStateMachineSWC_E_State(state)
             guard_state = GuardStates.SEARCH
-            log.LOGI(guard_state)
+            log.LOGI(GuardStates_STR[guard_state])
             search_flag = SearchFlag.reset
             check_entry = False
         else:
@@ -338,7 +338,7 @@ def shooting():
         state = States.IDLE
         Rte_Write_GuardingStateMachineSWC_E_State(state)
         guard_state = GuardStates.SEARCH
-        log.LOGI(guard_state)
+        log.LOGI(GuardStates_STR[guard_state])
         search_flag = SearchFlag.reset
 
 # this function centers the face and closes the gap to 50 cm 
@@ -374,7 +374,7 @@ def attacking():
         # changeing state if we are ready
         else:
             guard_state = GuardStates.SHOOTING
-            log.LOGI(guard_state)
+            log.LOGI(GuardStates_STR[guard_state])
 
         idle_time = 0
     
@@ -384,7 +384,7 @@ def attacking():
         idle_time = idle_time + async_timer
         if idle_time == max_idle_time:
             guard_state = GuardStates.SEARCH
-            log.LOGI(guard_state)
+            log.LOGI(GuardStates_STR[guard_state])
             search_flag = SearchFlag.reset
 
     elif face_position[1] < left_face_margin:
@@ -429,7 +429,7 @@ def searching():
     # changeing state if we see a face
     else:
         guard_state = GuardStates.ATTACKING
-        log.LOGI(guard_state)
+        log.LOGI(GuardStates_STR[guard_state])
     
     angle_delay = 2
 
@@ -449,7 +449,7 @@ def searching():
             Rte_Write_GuardingStateMachineSWC_E_State(state)
             Rte_Write_GuardingStateMachineSWC_b_guarding_mode(False)
             guard_state = GuardStates.SEARCH
-            log.LOGI(guard_state)
+            log.LOGI(GuardStates_STR[guard_state])
             search_flag = SearchFlag.reset
             
 # this function checks if we are in guarding mode and also calls the other function in every state      
@@ -461,6 +461,8 @@ async def guard_state_machine():
     global guard_state
     global search_flag 
     await asyncio.sleep_ms(first_sleep)  # Adjust sleep time later if needed
+
+    log.LOGI("Starting Gaurding State Machine")
     while True: 
 
         # getting data from RTE to a local variable
@@ -468,7 +470,7 @@ async def guard_state_machine():
         if guard_mode != enter_guard_mode and guard_mode:
             enter_guard_mode = not enter_guard_mode
             guard_state = GuardStates.SEARCH
-            log.LOGI(guard_state)
+            log.LOGI(GuardStates_STR[guard_state])
             search_flag = SearchFlag.reset
         elif guard_mode != enter_guard_mode and not guard_mode:
             enter_guard_mode = not enter_guard_mode
@@ -485,3 +487,4 @@ async def guard_state_machine():
             obstycle()
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
+    log.LOGF("Exited loop")

@@ -12,13 +12,21 @@ from typedefs import States
 global async_timer
 async_timer = 50 # this variable stores the time in ms that we use in asyncio.sleep
 
+# Logger
+import Logger
+log = Logger.Logger("BazookaSWC")
+
 async def BazookaSWC():
     global async_timer
     previousState = States.NONE  # this variable stores the previos state of the robot (starts with NONE)
+
+    log.LOGI("Starting Bazooka SWC")
     while True: 
         state = Rte_Read_BazookaSWC_E_State() # this variable stores the current state of the robot gets the value from the RTE
         if state == States.SHOOT and previousState != States.SHOOT:
+            log.LOGI("Started shooting")
             Rte_Write_BazookaSWC_b_Shoot(True)
         previousState = state
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time later if needed
+    log.LOGF("Exited loop")

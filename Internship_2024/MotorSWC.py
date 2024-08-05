@@ -15,6 +15,10 @@ timeGuards = {
 }
 motorSpeed = 100
 
+# Logger
+import Logger
+log = Logger.Logger("Motor SWC")
+
 async def MotorSWC():
     global runPeriod
     global timeGuards
@@ -25,7 +29,9 @@ async def MotorSWC():
     leftGuard = 0
     rightGuard = 0
     angleDelay = 3
+    lastState = Rte_Read_MotorSWC_E_State()
 
+    log.LOGI("Starting MotorSWC")
     while True: 
         state = Rte_Read_MotorSWC_E_State()
         angle = Rte_Read_MotorSWC_si16_Angle()
@@ -51,8 +57,11 @@ async def MotorSWC():
         # turn angle state:
         elif state == States.TURN_ANGLE:
             turn_angle = Rte_Read_MotorSWC_si16_turn_angle()
+            if lastState != state:
+                log.LOGI("Started {} degree turn".format(turn_angle))
 
             if angle > (turn_angle % 360) - angleDelay and angle < (turn_angle % 360) + angleDelay:
+                log.LOGI("Turn done")
                 turn_angle = 0
                 Rte_Write_MotorSWC_si16_turn_angle(turn_angle)
             
@@ -74,4 +83,6 @@ async def MotorSWC():
         forwardGuard = max(forwardGuard - runPeriod, 0)
         backwardGuard = max(backwardGuard - runPeriod, 0)
 
+        lastState = state
         await asyncio.sleep_ms(runPeriod)
+    log.LOGF("Exited loop")

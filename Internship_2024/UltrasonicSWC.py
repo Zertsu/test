@@ -14,6 +14,10 @@ global devide_forcm
 devide_forcm = 10  #the value we have to devide to get the distance in cm
 
 
+# Logger
+import Logger
+log = Logger.Logger("UltrasonicSWC")
+
 # Task to read ultrasonic sensor continuously
 async def UltrasonicSWC():
     global async_timer
@@ -21,6 +25,7 @@ async def UltrasonicSWC():
     counter = 0
     max_distance = 0
     
+    log.LOGI("Starting UltrasonicSWC")
     while True: 
         distance = Rte_Read_UltrasonicSWC_si16_Raw_distance()   #It will read in mm 
         distance_reset = Rte_Read_UltrasonicSWC_b_Distance_reset()
@@ -33,6 +38,7 @@ async def UltrasonicSWC():
 
         # in case of a distance reset:
         if distance_reset == True:
+            log.LOGI("Reset accumulated values")
             sum = 0
             counter = 0
             avg = 0.0
@@ -55,3 +61,4 @@ async def UltrasonicSWC():
 
 
         await asyncio.sleep_ms(async_timer)  # Adjust sleep time as needed
+    log.LOGF("Exited loop")
