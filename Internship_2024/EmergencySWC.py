@@ -25,7 +25,6 @@ async def EmergencySWC():
     previousTimeOutEmergency = False
     distanceEmergency = False
     previousDistanceEmergency = False
-    previousGuardEmergency = False
 
     log.LOGI("Starting emergency SWC")
     while True: 
@@ -55,13 +54,10 @@ async def EmergencySWC():
                 Rte_Write_EmergencySWC_b_Emergency_timeout(timeOutEmergency)
 
         if guardEmergency:
-            if not previousGuardEmergency:
-                log.LOGW("Guard emergency")
-                Rte_Write_EmergencySWC_b_guarding_emergency(guardEmergency)
-        else:
-            if previousGuardEmergency:
-                log.LOGW("Cleared guard emergency")
-                Rte_Write_EmergencySWC_b_guarding_emergency(guardEmergency)
+            log.LOGW("Guard emergency")
+            Rte_Write_EmergencySWC_b_guarding_emergency(False)
+            Rte_Write_EmergencySWC_b_guarding_mode(False)
+
 
         previousTimeOutEmergency = timeOutEmergency
         previousDistanceEmergency = distanceEmergency

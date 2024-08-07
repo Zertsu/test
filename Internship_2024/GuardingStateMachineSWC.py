@@ -158,9 +158,9 @@ def obstycle():
 
     # getting data from RTE to a local variable
     distance = Rte_Read_GuardingStateMachineSWC_f_Distance()
-
+    angle = Rte_Read_GuardingStateMachineSWC_si16_turn_angle()
     # checking in what state we are and doing things accordingly
-    if distance < emergency_distance and entry_number == no_obstycle:
+    if (distance < emergency_distance or in_box_flag == maybe_in_box) and entry_number == no_obstycle :
 
         guard_state = GuardStates.OBSTYCLE
         log.LOGI(GuardStates_STR[guard_state])
@@ -276,11 +276,15 @@ def obstycle():
                 run_time = 0
                 stay = True
             else:
-                state = States.GO_FORWARD
-                Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_fast)
-                Rte_Write_GuardingStateMachineSWC_E_State(state)
-                in_box_flag = not_in_box
-                run_time = run_time + async_timer
+                if in_box_flag == maybe_in_box:
+                    entry_number = no_obstycle
+                    stay = True
+                else:
+                    state = States.GO_FORWARD
+                    Rte_Write_GuardingStateMachineSWC_ui16_motor_speed(motor_speed_fast)
+                    Rte_Write_GuardingStateMachineSWC_E_State(state)
+                    in_box_flag = not_in_box
+                    run_time = run_time + async_timer
 
                 if run_time == max_run_time:
                     run_time = 0
